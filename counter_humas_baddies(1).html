@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>counter.exe</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
+
+  :root {
+    --win-gray:   #c0c0c0;
+    --win-dark:   #808080;
+    --win-darker: #404040;
+    --win-white:  #ffffff;
+    --win-black:  #000000;
+    --win-blue:   #000080;
+    --win-hi:     #1084d0;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: #008080;
+    width: 100vw; height: 100vh;
+    overflow: hidden;
+    font-family: 'VT323', monospace;
+    cursor: default;
+    user-select: none;
+  }
+
+  /* =========================================
+     BANANA RAIN
+  ========================================= */
+  #bananaLayer {
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 0; overflow: hidden;
+  }
+  .banana { position: absolute; opacity: 0; animation: bananaFly linear infinite; }
+  @keyframes bananaFly {
+    0%   { transform: translate(0,0) rotate(-10deg); opacity:0; }
+    8%   { opacity:.8; }
+    92%  { opacity:.8; }
+    100% { transform: translate(var(--dx),var(--dy)) rotate(20deg); opacity:0; }
+  }
+
+  /* =========================================
+     DESKTOP ICON  (draggable, shown when closed)
+  ========================================= */
+  #desktopIcon {
+    position: absolute;
+    top: 30px; left: 30px;
+    z-index: 4;
+    display: flex;            /* always visible */
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    width: 72px;
+    padding: 4px;
+    border: 1px solid transparent;
+    cursor: default;
+  }
+  #desktopIcon.visible { display: flex; }
+  #desktopIcon.selected {
+    border-color: rgba(255,255,255,0.5);
+    background: rgba(0,0,128,0.35);
+    outline: 1px dotted white;
+  }
+  #desktopIcon .di-img {
+    font-size: 2.6rem;
+    filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.6));
+    pointer-events: none;
+  }
+  #desktopIcon .di-label {
+    font-size: .85rem; color: white; text-align: center;
+    text-shadow: 1px 1px 2px black, -1px 0 2px black, 0 -1px 2px black;
+    line-height:1.15; white-space: nowrap;
+    pointer-events: none;
+  }
+
+  /* =========================================
+     MAIN WINDOW
+  ========================================= */
+  #mainWindow {
+    position: absolute;
+    z-index: 5;
+    background: var(--win-gray);
+    border-top: 2px solid var(--win-white);
+    border-left: 2px solid var(--win-white);
+    border-right: 2px solid var(--win-darker);
+    border-bottom: 2px solid var(--win-darker);
+    width: 460px;
+    box-shadow: 2px 2px 0 var(--win-black);
+  }
+
+  /* Title bar */
+  #titlebar {
+    background: linear-gradient(90deg, var(--win-blue), var(--win-hi));
+    padding: 3px 4px 3px 6px;
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: grab;
+  }
+  #titlebar:active { cursor: grabbing; }
+  .tb-left  { display:flex; align-items:center; gap:5px; pointer-events:none; }
+  .tb-icon  { font-size:.9rem; }
+  .tb-text  { font-size:1.05rem; color:white; letter-spacing:.02em; }
+  .tb-btns  { display:flex; gap:2px; pointer-events:all; }
+
+  .tb-btn {
+    width:16px; height:14px;
+    background:var(--win-gray);
+    border-top:1px solid var(--win-white); border-left:1px solid var(--win-white);
+    border-right:1px solid var(--win-darker); border-bottom:1px solid var(--win-darker);
+    font-size:.6rem; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; color:black; line-height:1;
+  }
+  .tb-btn:active {
+    border-top:1px solid var(--win-darker); border-left:1px solid var(--win-darker);
+    border-right:1px solid var(--win-white); border-bottom:1px solid var(--win-white);
+  }
+
+  /* Menu bar */
+  .menubar { background:var(--win-gray); border-bottom:1px solid var(--win-dark); padding:2px 4px; display:flex; }
+  .menu-item { font-size:1rem; padding:1px 8px; cursor:pointer; color:black; }
+  .menu-item:hover { background:var(--win-blue); color:white; }
+
+  /* Content */
+  .win-content { padding:16px 20px 20px; display:flex; flex-direction:column; align-items:center; }
+
+  .groupbox {
+    width:100%;
+    border-top:2px solid var(--win-darker); border-left:2px solid var(--win-darker);
+    border-right:2px solid var(--win-white); border-bottom:2px solid var(--win-white);
+    padding:10px 16px 16px; position:relative; margin-bottom:14px;
+  }
+  .groupbox-label {
+    position:absolute; top:-11px; left:10px;
+    background:var(--win-gray); padding:0 4px; font-size:1rem; color:black;
+  }
+
+  .app-title { font-size:1.5rem; color:black; text-align:center; line-height:1.1; margin-bottom:4px; }
+  .app-title .big { font-size:2.2rem; color:var(--win-blue); display:block; }
+
+  /* LCD counter */
+  #counterDisplay {
+    width:100%; background:#000;
+    border-top:2px solid var(--win-darker); border-left:2px solid var(--win-darker);
+    border-right:2px solid var(--win-white); border-bottom:2px solid var(--win-white);
+    padding:8px 14px 6px; margin:10px 0 16px;
+    text-align:right;
+    font-family:'Share Tech Mono',monospace; font-size:3.5rem;
+    color:#00ff41; letter-spacing:.08em;
+    text-shadow:0 0 8px #00ff41, 0 0 20px rgba(0,255,65,.4);
+    transition:color .05s, text-shadow .05s;
+    position:relative; overflow:hidden;
+  }
+  #counterDisplay::before {
+    content:''; position:absolute; inset:0;
+    background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,255,65,.04) 3px,rgba(0,255,65,.04) 4px);
+    pointer-events:none;
+  }
+  #counterDisplay.flash-up   { color:#ccff00; text-shadow:0 0 18px #ccff00, 0 0 40px rgba(200,255,0,.9); }
+  #counterDisplay.flash-down { color:#ff4444; text-shadow:0 0 18px #ff4444, 0 0 40px rgba(255,50,50,.8); }
+
+  /* Buttons */
+  .btn-row { display:flex; gap:8px; width:100%; justify-content:center; flex-wrap:wrap; }
+
+  .win-btn {
+    font-family:'VT323',monospace; font-size:1.1rem;
+    padding:4px 14px 2px;
+    background:var(--win-gray);
+    border-top:2px solid var(--win-white); border-left:2px solid var(--win-white);
+    border-right:2px solid var(--win-darker); border-bottom:2px solid var(--win-darker);
+    cursor:pointer; color:black; min-width:80px;
+    letter-spacing:.02em; outline:none; white-space:nowrap;
+  }
+  .win-btn:focus { outline:1px dotted black; outline-offset:-4px; }
+  .win-btn:active {
+    border-top:2px solid var(--win-darker); border-left:2px solid var(--win-darker);
+    border-right:2px solid var(--win-white); border-bottom:2px solid var(--win-white);
+    padding-top:5px; padding-left:16px;
+  }
+  .win-btn.primary { font-size:1.25rem; min-width:130px; }
+
+  /* Status bar */
+  .statusbar {
+    border-top:1px solid var(--win-dark); background:var(--win-gray);
+    display:flex; gap:4px; padding:2px 4px;
+    font-size:.85rem; color:black;
+  }
+  .status-panel {
+    border-top:1px solid var(--win-darker); border-left:1px solid var(--win-darker);
+    border-right:1px solid var(--win-white); border-bottom:1px solid var(--win-white);
+    padding:1px 6px; flex:1;
+  }
+
+  /* =========================================
+     TASKBAR
+  ========================================= */
+  #taskbar {
+    position:fixed; bottom:0; left:0; right:0; height:30px;
+    background:var(--win-gray); border-top:2px solid var(--win-white);
+    display:flex; align-items:center; z-index:10; padding:0 4px; gap:4px;
+  }
+
+  #taskbarBtn {
+    font-family:'VT323',monospace; font-size:.9rem;
+    height:22px; padding:2px 10px 0;
+    background:var(--win-gray);
+    /* active (window open) looks pressed */
+    border-top:2px solid var(--win-darker); border-left:2px solid var(--win-darker);
+    border-right:2px solid var(--win-white); border-bottom:2px solid var(--win-white);
+    display:none; align-items:center; gap:4px; color:black; cursor:pointer;
+  }
+  #taskbarBtn.visible { display:flex; }
+  #taskbarBtn.inactive {
+    /* window minimized — looks "up" / inactive */
+    border-top:2px solid var(--win-white); border-left:2px solid var(--win-white);
+    border-right:2px solid var(--win-darker); border-bottom:2px solid var(--win-darker);
+  }
+
+  #taskClock {
+    margin-left:auto; font-family:'VT323',monospace; font-size:.9rem;
+    height:22px; padding:2px 8px 0;
+    border-top:1px solid var(--win-darker); border-left:1px solid var(--win-darker);
+    border-right:1px solid var(--win-white); border-bottom:1px solid var(--win-white);
+    display:flex; align-items:center; color:black;
+  }
+
+  /* =========================================
+     POPUPS
+  ========================================= */
+  .pop-overlay {
+    position:fixed; inset:0; z-index:30;
+    display:none; align-items:center; justify-content:center;
+  }
+  .pop-overlay.show { display:flex; }
+
+  .popup {
+    background:var(--win-gray);
+    border-top:2px solid var(--win-white); border-left:2px solid var(--win-white);
+    border-right:2px solid var(--win-darker); border-bottom:2px solid var(--win-darker);
+    min-width:300px; max-width:380px;
+    box-shadow:3px 3px 0 var(--win-black);
+  }
+  .pop-title {
+    background:linear-gradient(90deg,var(--win-blue),var(--win-hi));
+    padding:3px 4px; display:flex; justify-content:space-between; align-items:center;
+    font-size:1rem; color:white;
+  }
+  .pop-body { padding:14px 18px 10px; display:flex; align-items:flex-start; gap:12px; }
+  .pop-icon { font-size:2.2rem; flex-shrink:0; }
+  .pop-text { font-size:1.05rem; line-height:1.35; color:black; white-space:pre-wrap; }
+  .pop-btns { display:flex; justify-content:center; gap:8px; padding:6px 16px 14px; }
+</style>
+</head>
+<body>
+
+<!-- Banana rain -->
+<div id="bananaLayer"></div>
+
+<!-- Desktop icon (shown only when window is closed) -->
+<div id="desktopIcon">
+  <div class="di-img">🍌</div>
+  <div class="di-label">counter.exe</div>
+</div>
+
+<!-- ===== CLOSE CONFIRM POPUP ===== -->
+<div class="pop-overlay" id="closeOverlay">
+  <div class="popup">
+    <div class="pop-title">
+      <span>⚠️ counter.exe</span>
+      <div class="tb-btn" onclick="cancelClose()">✕</div>
+    </div>
+    <div class="pop-body">
+      <div class="pop-icon">⚠️</div>
+      <div class="pop-text">Vuoi chiudere Counter Humas Baddies?
+
+Il contatore verrà salvato e rimarrà aggiornato.</div>
+    </div>
+    <div class="pop-btns">
+      <button class="win-btn primary" onclick="confirmClose()">OK</button>
+      <button class="win-btn" onclick="cancelClose()">Annulla</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== INFO POPUP ===== -->
+<div class="pop-overlay" id="infoOverlay">
+  <div class="popup">
+    <div class="pop-title">
+      <span><span id="pIcon">⚠️</span> <span id="pTitle">counter.exe</span></span>
+      <div class="tb-btn" onclick="closeInfo()">✕</div>
+    </div>
+    <div class="pop-body">
+      <div class="pop-icon" id="pBodyIcon">⚠️</div>
+      <div class="pop-text" id="pText"></div>
+    </div>
+    <div class="pop-btns" id="pBtns">
+      <button class="win-btn" onclick="closeInfo()" style="min-width:70px">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MAIN WINDOW ===== -->
+<div id="mainWindow">
+  <div id="titlebar">
+    <div class="tb-left">
+      <span class="tb-icon">🍌</span>
+      <span class="tb-text">Counter Humas Baddies — counter.exe</span>
+    </div>
+    <div class="tb-btns">
+      <div class="tb-btn" title="Riduci a icona" id="minBtn">_</div>
+      <div class="tb-btn" title="Ingrandisci">□</div>
+      <div class="tb-btn" title="Chiudi" id="closeBtn">✕</div>
+    </div>
+  </div>
+
+  <div class="menubar">
+    <div class="menu-item" onclick="showInfo('File','📁','New Count\nOpen Count\nSave Count\n──────────\nExit')">File</div>
+    <div class="menu-item" onclick="showInfo('Edit','✏️','Undo (+1)\nRedo\nCopy Count\nPaste Count')">Edit</div>
+    <div class="menu-item" onclick="showInfo('View','👁️','Refresh\nStatus Bar  ✓\nBanana Rain ✓')">View</div>
+    <div class="menu-item" onclick="showInfo('Help','❓','How to Count\nAbout Baddies\n\nCounter Humas Baddies v1.0\n(c) 1998 HumasCorp Ltd.')">Help</div>
+  </div>
+
+  <div class="win-content">
+    <div class="groupbox">
+      <div class="groupbox-label">Baddie Counter</div>
+      <div class="app-title">COUNTER<span class="big">HUMAS BADDIES</span></div>
+      <div id="counterDisplay">0</div>
+      <div class="btn-row">
+        <button class="win-btn primary" onclick="increment()">🍌 +1 Baddie</button>
+        <button class="win-btn primary" onclick="decrement()">😢 -1 Baddie</button>
+        <button class="win-btn" onclick="resetCount()">↺ Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <div class="status-panel" id="statusMsg">Ready</div>
+    <div class="status-panel" style="flex:0;white-space:nowrap">🍌 Banana: ON</div>
+    <div class="status-panel" style="flex:0;white-space:nowrap" id="statusCount">Count: 0</div>
+  </div>
+</div>
+
+<!-- ===== TASKBAR ===== -->
+<div id="taskbar">
+  <div id="taskbarBtn" onclick="onTaskbarClick()">🍌 counter.exe</div>
+  <div id="taskClock">00:00</div>
+</div>
+
+<script>
+/* ============================================================
+   STATE
+============================================================ */
+let count = parseInt(localStorage.getItem('win64BaddiesCount') || '0');
+const display    = document.getElementById('counterDisplay');
+const statusMsg  = document.getElementById('statusMsg');
+const statusCount= document.getElementById('statusCount');
+const mainWin    = document.getElementById('mainWindow');
+const desktopIco = document.getElementById('desktopIcon');
+const taskBtn    = document.getElementById('taskbarBtn');
+
+// 'open' | 'minimized' | 'closed'
+let winState = 'open';
+
+function setWinState(s) {
+  winState = s;
+  if (s === 'open') {
+    mainWin.style.display  = '';
+    taskBtn.classList.add('visible');
+    taskBtn.classList.remove('inactive');
+  } else if (s === 'minimized') {
+    mainWin.style.display  = 'none';
+    taskBtn.classList.add('visible');
+    taskBtn.classList.add('inactive');
+  } else {                          // 'closed'
+    mainWin.style.display  = 'none';
+    taskBtn.classList.remove('visible');
+    taskBtn.classList.remove('inactive');
+  }
+}
+
+/* ============================================================
+   CENTER WINDOW ON LOAD
+============================================================ */
+window.addEventListener('load', () => {
+  const w = mainWin.offsetWidth, h = mainWin.offsetHeight;
+  mainWin.style.left = Math.max(0, (window.innerWidth - w)  / 2) + 'px';
+  mainWin.style.top  = Math.max(0, (window.innerHeight - 30 - h) / 2) + 'px';
+  updateDisplay();
+});
+
+/* ============================================================
+   WINDOW DRAG  (title bar)
+============================================================ */
+let dragging = false, dragOX = 0, dragOY = 0;
+
+document.getElementById('titlebar').addEventListener('mousedown', e => {
+  if (e.target.classList.contains('tb-btn')) return;
+  dragging = true;
+  const r = mainWin.getBoundingClientRect();
+  dragOX = e.clientX - r.left;
+  dragOY = e.clientY - r.top;
+  e.preventDefault();
+});
+document.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  let nx = e.clientX - dragOX;
+  let ny = e.clientY - dragOY;
+  nx = Math.max(0, Math.min(nx, window.innerWidth  - mainWin.offsetWidth));
+  ny = Math.max(0, Math.min(ny, window.innerHeight - 30 - mainWin.offsetHeight));
+  mainWin.style.left = nx + 'px';
+  mainWin.style.top  = ny + 'px';
+});
+document.addEventListener('mouseup', () => { dragging = false; });
+
+/* ============================================================
+   DESKTOP ICON DRAG
+============================================================ */
+let iconDragging = false, iconDX = 0, iconDY = 0, iconMoved = false;
+
+desktopIco.addEventListener('mousedown', e => {
+  iconDragging = true; iconMoved = false;
+  const r = desktopIco.getBoundingClientRect();
+  iconDX = e.clientX - r.left;
+  iconDY = e.clientY - r.top;
+  desktopIco.classList.add('selected');
+  e.preventDefault();
+});
+document.addEventListener('mousemove', e => {
+  if (!iconDragging) return;
+  iconMoved = true;
+  let nx = e.clientX - iconDX;
+  let ny = e.clientY - iconDY;
+  nx = Math.max(0, Math.min(nx, window.innerWidth  - desktopIco.offsetWidth));
+  ny = Math.max(0, Math.min(ny, window.innerHeight - 30 - desktopIco.offsetHeight));
+  desktopIco.style.left = nx + 'px';
+  desktopIco.style.top  = ny + 'px';
+});
+document.addEventListener('mouseup', e => {
+  if (!iconDragging) return;
+  iconDragging = false;
+  // Double-click detection: if barely moved and it was a second click fast → open
+  // We handle this via dblclick event instead
+});
+
+// Single click = select, double click = open
+desktopIco.addEventListener('click', e => {
+  if (iconMoved) { iconMoved = false; return; } // was a drag, not a click
+  desktopIco.classList.add('selected');
+});
+desktopIco.addEventListener('dblclick', () => {
+  if (iconMoved) return;
+  setWinState('open');
+});
+// Clicking elsewhere deselects
+document.addEventListener('click', e => {
+  if (!desktopIco.contains(e.target)) desktopIco.classList.remove('selected');
+});
+
+/* ============================================================
+   TITLEBAR BUTTONS
+============================================================ */
+document.getElementById('minBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  setWinState('minimized');
+});
+document.getElementById('closeBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  document.getElementById('closeOverlay').classList.add('show');
+});
+
+function cancelClose() { document.getElementById('closeOverlay').classList.remove('show'); }
+function confirmClose() {
+  document.getElementById('closeOverlay').classList.remove('show');
+  setWinState('closed');
+}
+
+/* ============================================================
+   TASKBAR BUTTON
+============================================================ */
+function onTaskbarClick() {
+  if (winState === 'open')      setWinState('minimized');
+  else if (winState === 'minimized') setWinState('open');
+  // 'closed' state: taskbarBtn is hidden so this won't fire
+}
+
+/* ============================================================
+   COUNTER LOGIC
+============================================================ */
+function updateDisplay() {
+  display.textContent = count.toLocaleString();
+  statusCount.textContent = 'Count: ' + count.toLocaleString();
+}
+
+function increment() {
+  count++;
+  localStorage.setItem('win64BaddiesCount', count);
+  updateDisplay(); flash('flash-up');
+  const msgs = ['Baddie recorded.','Processing baddie...','Baddie added to registry.',
+    'Writing to C:\\baddies.dat...','Saving... do not turn off.','Baddie.exe successfully run.',
+    '🍌 Banana mode active.','Registering in HKEY_LOCAL_MACHINE...','DLL not found. Proceeding anyway.'];
+  statusMsg.textContent = msgs[count % msgs.length];
+  if (count === 10)  showInfo('Achievement!','🎉','10 Baddies Counted!\n\nYou are a true HumasBaddie Pro.');
+  if (count === 50)  showInfo('WARNING','⚠️','Baddie overflow detected.\nCount = ' + count + '\nCall IT Support immediately.');
+  if (count === 100) showInfo('CRITICAL ERROR','💥','BANANA_KERNEL_PANIC\n\nToo many baddies.\nCount: ' + count + '\n\nSystem may become unstable.');
+}
+
+function decrement() {
+  if (count <= 0) {
+    showInfo('Errore','😢','Non puoi avere baddies negativi!\n\nIl contatore è già a 0.\n\nError code: BADDIE_UNDERFLOW');
+    return;
+  }
+  count--;
+  localStorage.setItem('win64BaddiesCount', count);
+  updateDisplay(); flash('flash-down');
+  const msgs = ['Baddie rimosso. 😢','Un baddie in meno...','Rimozione da C:\\baddies.dat...',
+    'Baddie eliminato dal registro.','Operazione completata. Tristezza.'];
+  statusMsg.textContent = msgs[count % msgs.length];
+}
+
+function resetCount() {
+  showInfo('Conferma Reset','⚠️','Resettare il contatore a 0?\n\nQuesta azione non può essere annullata.');
+  document.getElementById('pBtns').innerHTML =
+    `<button class="win-btn" onclick="doReset()" style="min-width:70px">OK</button>
+     <button class="win-btn" onclick="closeInfo()" style="min-width:80px">Annulla</button>`;
+}
+function doReset() {
+  count = 0;
+  localStorage.setItem('win64BaddiesCount', 0);
+  updateDisplay();
+  statusMsg.textContent = 'Counter reset. Goodbye, baddies.';
+  closeInfo();
+}
+
+function flash(cls) {
+  display.classList.remove('flash-up','flash-down');
+  void display.offsetWidth;
+  display.classList.add(cls);
+  setTimeout(() => display.classList.remove(cls), 180);
+}
+
+/* ============================================================
+   INFO POPUP
+============================================================ */
+function showInfo(title, icon, msg) {
+  document.getElementById('pTitle').textContent = title;
+  document.getElementById('pIcon').textContent  = icon;
+  document.getElementById('pBodyIcon').textContent = icon;
+  document.getElementById('pText').textContent  = msg;
+  document.getElementById('pBtns').innerHTML =
+    `<button class="win-btn" onclick="closeInfo()" style="min-width:70px">OK</button>`;
+  document.getElementById('infoOverlay').classList.add('show');
+}
+function closeInfo() {
+  document.getElementById('infoOverlay').classList.remove('show');
+  document.getElementById('pBtns').innerHTML =
+    `<button class="win-btn" onclick="closeInfo()" style="min-width:70px">OK</button>`;
+}
+
+/* ============================================================
+   CLOCK
+============================================================ */
+function tick() {
+  const n = new Date();
+  document.getElementById('taskClock').textContent =
+    String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
+}
+tick(); setInterval(tick, 15000);
+
+/* ============================================================
+   BANANA RAIN
+============================================================ */
+const layer = document.getElementById('bananaLayer');
+for (let i = 0; i < 22; i++) {
+  const el = document.createElement('div');
+  el.className = 'banana'; el.textContent = '🍌';
+  const sx = Math.random() * window.innerWidth  * 0.55;
+  const sy = window.innerHeight * 0.35 + Math.random() * window.innerHeight * 0.65;
+  el.style.left = sx + 'px'; el.style.top = sy + 'px';
+  el.style.setProperty('--dx', (window.innerWidth  * 0.5 + Math.random() * window.innerWidth  * 0.6) + 'px');
+  el.style.setProperty('--dy', -(window.innerHeight * 0.55 + Math.random() * window.innerHeight * 0.55) + 'px');
+  const dur = 5 + Math.random() * 6;
+  el.style.animationDuration = dur + 's';
+  el.style.animationDelay   = (-Math.random() * dur) + 's';
+  el.style.fontSize = (1.1 + Math.random() * 1.5) + 'rem';
+  layer.appendChild(el);
+}
+</script>
+</body>
+</html>
