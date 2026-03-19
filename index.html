@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>counter.exe</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
@@ -17,7 +17,7 @@
     --win-hi:     #1084d0;
   }
 
-  * { margin:0; padding:0; box-sizing:border-box; }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
 
   body {
     background: #008080;
@@ -26,6 +26,7 @@
     font-family: 'VT323', monospace;
     cursor: default;
     user-select: none;
+    touch-action: none;
   }
 
   /* =========================================
@@ -44,34 +45,34 @@
   }
 
   /* =========================================
-     DESKTOP ICON  (draggable, shown when closed)
+     DESKTOP ICON
   ========================================= */
   #desktopIcon {
     position: absolute;
-    top: 30px; left: 30px;
+    top: 16px; left: 16px;
     z-index: 4;
-    display: flex;            /* always visible */
+    display: flex;
     flex-direction: column;
     align-items: center;
     gap: 3px;
-    width: 72px;
+    width: 68px;
     padding: 4px;
     border: 1px solid transparent;
     cursor: default;
+    touch-action: none;
   }
-  #desktopIcon.visible { display: flex; }
   #desktopIcon.selected {
     border-color: rgba(255,255,255,0.5);
     background: rgba(0,0,128,0.35);
     outline: 1px dotted white;
   }
   #desktopIcon .di-img {
-    font-size: 2.6rem;
+    font-size: 2.4rem;
     filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.6));
     pointer-events: none;
   }
   #desktopIcon .di-label {
-    font-size: .85rem; color: white; text-align: center;
+    font-size: .82rem; color: white; text-align: center;
     text-shadow: 1px 1px 2px black, -1px 0 2px black, 0 -1px 2px black;
     line-height:1.15; white-space: nowrap;
     pointer-events: none;
@@ -88,29 +89,30 @@
     border-left: 2px solid var(--win-white);
     border-right: 2px solid var(--win-darker);
     border-bottom: 2px solid var(--win-darker);
-    width: 460px;
     box-shadow: 2px 2px 0 var(--win-black);
+    /* width set by JS */
+    touch-action: none;
   }
 
   /* Title bar */
   #titlebar {
     background: linear-gradient(90deg, var(--win-blue), var(--win-hi));
-    padding: 3px 4px 3px 6px;
+    padding: 4px 4px 4px 6px;
     display: flex; align-items: center; justify-content: space-between;
-    cursor: grab;
+    cursor: grab; touch-action: none;
   }
   #titlebar:active { cursor: grabbing; }
-  .tb-left  { display:flex; align-items:center; gap:5px; pointer-events:none; }
-  .tb-icon  { font-size:.9rem; }
-  .tb-text  { font-size:1.05rem; color:white; letter-spacing:.02em; }
-  .tb-btns  { display:flex; gap:2px; pointer-events:all; }
+  .tb-left  { display:flex; align-items:center; gap:5px; pointer-events:none; overflow:hidden; }
+  .tb-icon  { font-size:.9rem; flex-shrink:0; }
+  .tb-text  { font-size:1rem; color:white; letter-spacing:.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tb-btns  { display:flex; gap:3px; pointer-events:all; flex-shrink:0; }
 
   .tb-btn {
-    width:16px; height:14px;
+    width:18px; height:16px;
     background:var(--win-gray);
     border-top:1px solid var(--win-white); border-left:1px solid var(--win-white);
     border-right:1px solid var(--win-darker); border-bottom:1px solid var(--win-darker);
-    font-size:.6rem; display:flex; align-items:center; justify-content:center;
+    font-size:.65rem; display:flex; align-items:center; justify-content:center;
     cursor:pointer; color:black; line-height:1;
   }
   .tb-btn:active {
@@ -119,39 +121,46 @@
   }
 
   /* Menu bar */
-  .menubar { background:var(--win-gray); border-bottom:1px solid var(--win-dark); padding:2px 4px; display:flex; }
-  .menu-item { font-size:1rem; padding:1px 8px; cursor:pointer; color:black; }
-  .menu-item:hover { background:var(--win-blue); color:white; }
+  .menubar {
+    background:var(--win-gray); border-bottom:1px solid var(--win-dark);
+    padding:2px 4px; display:flex; overflow-x:auto; overflow-y:hidden;
+    scrollbar-width:none;
+  }
+  .menubar::-webkit-scrollbar { display:none; }
+  .menu-item { font-size:1rem; padding:2px 8px; cursor:pointer; color:black; white-space:nowrap; }
+  .menu-item:hover, .menu-item:active { background:var(--win-blue); color:white; }
 
   /* Content */
-  .win-content { padding:16px 20px 20px; display:flex; flex-direction:column; align-items:center; }
+  .win-content { padding:12px 14px 14px; display:flex; flex-direction:column; align-items:center; }
 
   .groupbox {
     width:100%;
     border-top:2px solid var(--win-darker); border-left:2px solid var(--win-darker);
     border-right:2px solid var(--win-white); border-bottom:2px solid var(--win-white);
-    padding:10px 16px 16px; position:relative; margin-bottom:14px;
+    padding:10px 12px 14px; position:relative; margin-bottom:12px;
   }
   .groupbox-label {
     position:absolute; top:-11px; left:10px;
     background:var(--win-gray); padding:0 4px; font-size:1rem; color:black;
   }
 
-  .app-title { font-size:1.5rem; color:black; text-align:center; line-height:1.1; margin-bottom:4px; }
-  .app-title .big { font-size:2.2rem; color:var(--win-blue); display:block; }
+  .app-title { font-size:1.4rem; color:black; text-align:center; line-height:1.1; margin-bottom:4px; }
+  .app-title .big { color:var(--win-blue); display:block; }
 
   /* LCD counter */
   #counterDisplay {
     width:100%; background:#000;
     border-top:2px solid var(--win-darker); border-left:2px solid var(--win-darker);
     border-right:2px solid var(--win-white); border-bottom:2px solid var(--win-white);
-    padding:8px 14px 6px; margin:10px 0 16px;
+    padding:6px 12px 4px; margin:8px 0 14px;
     text-align:right;
-    font-family:'Share Tech Mono',monospace; font-size:3.5rem;
-    color:#00ff41; letter-spacing:.08em;
+    font-family:'Share Tech Mono',monospace;
+    color:#00ff41; letter-spacing:.06em;
     text-shadow:0 0 8px #00ff41, 0 0 20px rgba(0,255,65,.4);
     transition:color .05s, text-shadow .05s;
     position:relative; overflow:hidden;
+    /* font-size responsive — set by JS */
+    font-size: clamp(2.2rem, 10vw, 3.5rem);
   }
   #counterDisplay::before {
     content:''; position:absolute; inset:0;
@@ -162,35 +171,41 @@
   #counterDisplay.flash-down { color:#ff4444; text-shadow:0 0 18px #ff4444, 0 0 40px rgba(255,50,50,.8); }
 
   /* Buttons */
-  .btn-row { display:flex; gap:8px; width:100%; justify-content:center; flex-wrap:wrap; }
+  .btn-row { display:flex; gap:6px; width:100%; justify-content:center; flex-wrap:wrap; }
 
   .win-btn {
-    font-family:'VT323',monospace; font-size:1.1rem;
-    padding:4px 14px 2px;
+    font-family:'VT323',monospace;
+    padding:6px 10px 4px;
     background:var(--win-gray);
     border-top:2px solid var(--win-white); border-left:2px solid var(--win-white);
     border-right:2px solid var(--win-darker); border-bottom:2px solid var(--win-darker);
-    cursor:pointer; color:black; min-width:80px;
+    cursor:pointer; color:black;
     letter-spacing:.02em; outline:none; white-space:nowrap;
+    font-size: clamp(.95rem, 3.5vw, 1.15rem);
+    min-width: clamp(70px, 22vw, 90px);
+    touch-action: manipulation;
   }
   .win-btn:focus { outline:1px dotted black; outline-offset:-4px; }
   .win-btn:active {
     border-top:2px solid var(--win-darker); border-left:2px solid var(--win-darker);
     border-right:2px solid var(--win-white); border-bottom:2px solid var(--win-white);
-    padding-top:5px; padding-left:16px;
+    padding-top:7px; padding-left:12px;
   }
-  .win-btn.primary { font-size:1.25rem; min-width:130px; }
+  .win-btn.primary {
+    font-size: clamp(1rem, 4vw, 1.25rem);
+    min-width: clamp(100px, 28vw, 130px);
+  }
 
   /* Status bar */
   .statusbar {
     border-top:1px solid var(--win-dark); background:var(--win-gray);
     display:flex; gap:4px; padding:2px 4px;
-    font-size:.85rem; color:black;
+    font-size:.82rem; color:black;
   }
   .status-panel {
     border-top:1px solid var(--win-darker); border-left:1px solid var(--win-darker);
     border-right:1px solid var(--win-white); border-bottom:1px solid var(--win-white);
-    padding:1px 6px; flex:1;
+    padding:1px 6px; flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
   }
 
   /* =========================================
@@ -203,24 +218,25 @@
   }
 
   #taskbarBtn {
-    font-family:'VT323',monospace; font-size:.9rem;
-    height:22px; padding:2px 10px 0;
+    font-family:'VT323',monospace; font-size:.88rem;
+    height:22px; padding:2px 8px 0;
     background:var(--win-gray);
-    /* active (window open) looks pressed */
     border-top:2px solid var(--win-darker); border-left:2px solid var(--win-darker);
     border-right:2px solid var(--win-white); border-bottom:2px solid var(--win-white);
     display:none; align-items:center; gap:4px; color:black; cursor:pointer;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    max-width: 55vw;
+    touch-action: manipulation;
   }
   #taskbarBtn.visible { display:flex; }
   #taskbarBtn.inactive {
-    /* window minimized — looks "up" / inactive */
     border-top:2px solid var(--win-white); border-left:2px solid var(--win-white);
     border-right:2px solid var(--win-darker); border-bottom:2px solid var(--win-darker);
   }
 
   #taskClock {
-    margin-left:auto; font-family:'VT323',monospace; font-size:.9rem;
-    height:22px; padding:2px 8px 0;
+    margin-left:auto; font-family:'VT323',monospace; font-size:.88rem;
+    height:22px; padding:2px 6px 0; flex-shrink:0;
     border-top:1px solid var(--win-darker); border-left:1px solid var(--win-darker);
     border-right:1px solid var(--win-white); border-bottom:1px solid var(--win-white);
     display:flex; align-items:center; color:black;
@@ -232,6 +248,7 @@
   .pop-overlay {
     position:fixed; inset:0; z-index:30;
     display:none; align-items:center; justify-content:center;
+    padding: 16px;
   }
   .pop-overlay.show { display:flex; }
 
@@ -239,32 +256,30 @@
     background:var(--win-gray);
     border-top:2px solid var(--win-white); border-left:2px solid var(--win-white);
     border-right:2px solid var(--win-darker); border-bottom:2px solid var(--win-darker);
-    min-width:300px; max-width:380px;
+    width: 100%; max-width:360px;
     box-shadow:3px 3px 0 var(--win-black);
   }
   .pop-title {
     background:linear-gradient(90deg,var(--win-blue),var(--win-hi));
-    padding:3px 4px; display:flex; justify-content:space-between; align-items:center;
+    padding:4px 4px; display:flex; justify-content:space-between; align-items:center;
     font-size:1rem; color:white;
   }
-  .pop-body { padding:14px 18px 10px; display:flex; align-items:flex-start; gap:12px; }
-  .pop-icon { font-size:2.2rem; flex-shrink:0; }
-  .pop-text { font-size:1.05rem; line-height:1.35; color:black; white-space:pre-wrap; }
+  .pop-body { padding:14px 16px 10px; display:flex; align-items:flex-start; gap:12px; }
+  .pop-icon { font-size:2rem; flex-shrink:0; }
+  .pop-text { font-size:1rem; line-height:1.35; color:black; white-space:pre-wrap; }
   .pop-btns { display:flex; justify-content:center; gap:8px; padding:6px 16px 14px; }
 </style>
 </head>
 <body>
 
-<!-- Banana rain -->
 <div id="bananaLayer"></div>
 
-<!-- Desktop icon (shown only when window is closed) -->
 <div id="desktopIcon">
   <div class="di-img">🍌</div>
   <div class="di-label">counter.exe</div>
 </div>
 
-<!-- ===== CLOSE CONFIRM POPUP ===== -->
+<!-- CLOSE CONFIRM -->
 <div class="pop-overlay" id="closeOverlay">
   <div class="popup">
     <div class="pop-title">
@@ -284,7 +299,7 @@ Il contatore verrà salvato e rimarrà aggiornato.</div>
   </div>
 </div>
 
-<!-- ===== INFO POPUP ===== -->
+<!-- INFO POPUP -->
 <div class="pop-overlay" id="infoOverlay">
   <div class="popup">
     <div class="pop-title">
@@ -301,7 +316,7 @@ Il contatore verrà salvato e rimarrà aggiornato.</div>
   </div>
 </div>
 
-<!-- ===== MAIN WINDOW ===== -->
+<!-- MAIN WINDOW -->
 <div id="mainWindow">
   <div id="titlebar">
     <div class="tb-left">
@@ -309,9 +324,9 @@ Il contatore verrà salvato e rimarrà aggiornato.</div>
       <span class="tb-text">Counter Humas Baddies — counter.exe</span>
     </div>
     <div class="tb-btns">
-      <div class="tb-btn" title="Riduci a icona" id="minBtn">_</div>
+      <div class="tb-btn" id="minBtn" title="Riduci a icona">_</div>
       <div class="tb-btn" title="Ingrandisci">□</div>
-      <div class="tb-btn" title="Chiudi" id="closeBtn">✕</div>
+      <div class="tb-btn" id="closeBtn" title="Chiudi">✕</div>
     </div>
   </div>
 
@@ -337,12 +352,10 @@ Il contatore verrà salvato e rimarrà aggiornato.</div>
 
   <div class="statusbar">
     <div class="status-panel" id="statusMsg">Ready</div>
-    <div class="status-panel" style="flex:0;white-space:nowrap">🍌 Banana: ON</div>
-    <div class="status-panel" style="flex:0;white-space:nowrap" id="statusCount">Count: 0</div>
   </div>
 </div>
 
-<!-- ===== TASKBAR ===== -->
+<!-- TASKBAR -->
 <div id="taskbar">
   <div id="taskbarBtn" onclick="onTaskbarClick()">🍌 counter.exe</div>
   <div id="taskClock">00:00</div>
@@ -350,48 +363,76 @@ Il contatore verrà salvato e rimarrà aggiornato.</div>
 
 <script>
 /* ============================================================
+   RESPONSIVE SIZING
+============================================================ */
+const isMobile = () => window.innerWidth < 600;
+
+function sizeWindow() {
+  const win = document.getElementById('mainWindow');
+  if (isMobile()) {
+    const vw = window.innerWidth;
+    win.style.width = Math.min(vw - 16, 460) + 'px';
+  } else {
+    win.style.width = '460px';
+  }
+}
+
+function centerWindow() {
+  const win = document.getElementById('mainWindow');
+  sizeWindow();
+  win.style.left = Math.max(4, (window.innerWidth  - win.offsetWidth)  / 2) + 'px';
+  win.style.top  = Math.max(4, (window.innerHeight - 30 - win.offsetHeight) / 2) + 'px';
+}
+
+window.addEventListener('resize', () => {
+  sizeWindow();
+  // Re-clamp position so it doesn't go off screen
+  const win = document.getElementById('mainWindow');
+  const cx = parseFloat(win.style.left);
+  const cy = parseFloat(win.style.top);
+  win.style.left = Math.max(0, Math.min(cx, window.innerWidth  - win.offsetWidth))  + 'px';
+  win.style.top  = Math.max(0, Math.min(cy, window.innerHeight - 30 - win.offsetHeight)) + 'px';
+});
+
+/* ============================================================
    STATE
 ============================================================ */
 let count = parseInt(localStorage.getItem('win64BaddiesCount') || '0');
-const display    = document.getElementById('counterDisplay');
-const statusMsg  = document.getElementById('statusMsg');
-const statusCount= document.getElementById('statusCount');
-const mainWin    = document.getElementById('mainWindow');
-const desktopIco = document.getElementById('desktopIcon');
-const taskBtn    = document.getElementById('taskbarBtn');
+const display   = document.getElementById('counterDisplay');
+const statusMsg = document.getElementById('statusMsg');
+const mainWin   = document.getElementById('mainWindow');
+const desktopIco= document.getElementById('desktopIcon');
+const taskBtn   = document.getElementById('taskbarBtn');
 
-// 'open' | 'minimized' | 'closed'
 let winState = 'open';
 
 function setWinState(s) {
   winState = s;
   if (s === 'open') {
-    mainWin.style.display  = '';
+    mainWin.style.display = '';
     taskBtn.classList.add('visible');
     taskBtn.classList.remove('inactive');
   } else if (s === 'minimized') {
-    mainWin.style.display  = 'none';
+    mainWin.style.display = 'none';
     taskBtn.classList.add('visible');
     taskBtn.classList.add('inactive');
-  } else {                          // 'closed'
-    mainWin.style.display  = 'none';
+  } else { // closed
+    mainWin.style.display = 'none';
     taskBtn.classList.remove('visible');
     taskBtn.classList.remove('inactive');
   }
 }
 
 /* ============================================================
-   CENTER WINDOW ON LOAD
+   INIT
 ============================================================ */
 window.addEventListener('load', () => {
-  const w = mainWin.offsetWidth, h = mainWin.offsetHeight;
-  mainWin.style.left = Math.max(0, (window.innerWidth - w)  / 2) + 'px';
-  mainWin.style.top  = Math.max(0, (window.innerHeight - 30 - h) / 2) + 'px';
+  centerWindow();
   updateDisplay();
 });
 
 /* ============================================================
-   WINDOW DRAG  (title bar)
+   WINDOW DRAG — mouse
 ============================================================ */
 let dragging = false, dragOX = 0, dragOY = 0;
 
@@ -405,55 +446,86 @@ document.getElementById('titlebar').addEventListener('mousedown', e => {
 });
 document.addEventListener('mousemove', e => {
   if (!dragging) return;
-  let nx = e.clientX - dragOX;
-  let ny = e.clientY - dragOY;
-  nx = Math.max(0, Math.min(nx, window.innerWidth  - mainWin.offsetWidth));
-  ny = Math.max(0, Math.min(ny, window.innerHeight - 30 - mainWin.offsetHeight));
-  mainWin.style.left = nx + 'px';
-  mainWin.style.top  = ny + 'px';
+  clampMove(mainWin, e.clientX - dragOX, e.clientY - dragOY);
 });
 document.addEventListener('mouseup', () => { dragging = false; });
 
 /* ============================================================
-   DESKTOP ICON DRAG
+   WINDOW DRAG — touch
 ============================================================ */
-let iconDragging = false, iconDX = 0, iconDY = 0, iconMoved = false;
+document.getElementById('titlebar').addEventListener('touchstart', e => {
+  if (e.target.classList.contains('tb-btn')) return;
+  dragging = true;
+  const r = mainWin.getBoundingClientRect();
+  dragOX = e.touches[0].clientX - r.left;
+  dragOY = e.touches[0].clientY - r.top;
+  e.preventDefault();
+}, { passive: false });
+document.addEventListener('touchmove', e => {
+  if (!dragging) return;
+  clampMove(mainWin, e.touches[0].clientX - dragOX, e.touches[0].clientY - dragOY);
+  e.preventDefault();
+}, { passive: false });
+document.addEventListener('touchend', () => { dragging = false; });
+
+function clampMove(el, nx, ny) {
+  nx = Math.max(0, Math.min(nx, window.innerWidth  - el.offsetWidth));
+  ny = Math.max(0, Math.min(ny, window.innerHeight - 30 - el.offsetHeight));
+  el.style.left = nx + 'px';
+  el.style.top  = ny + 'px';
+}
+
+/* ============================================================
+   DESKTOP ICON DRAG — mouse
+============================================================ */
+let iconDrag = false, iconDX = 0, iconDY = 0, iconMoved = false;
 
 desktopIco.addEventListener('mousedown', e => {
-  iconDragging = true; iconMoved = false;
+  iconDrag = true; iconMoved = false;
   const r = desktopIco.getBoundingClientRect();
-  iconDX = e.clientX - r.left;
-  iconDY = e.clientY - r.top;
+  iconDX = e.clientX - r.left; iconDY = e.clientY - r.top;
   desktopIco.classList.add('selected');
   e.preventDefault();
 });
 document.addEventListener('mousemove', e => {
-  if (!iconDragging) return;
+  if (!iconDrag) return;
   iconMoved = true;
-  let nx = e.clientX - iconDX;
-  let ny = e.clientY - iconDY;
-  nx = Math.max(0, Math.min(nx, window.innerWidth  - desktopIco.offsetWidth));
-  ny = Math.max(0, Math.min(ny, window.innerHeight - 30 - desktopIco.offsetHeight));
-  desktopIco.style.left = nx + 'px';
-  desktopIco.style.top  = ny + 'px';
+  clampMove(desktopIco, e.clientX - iconDX, e.clientY - iconDY);
 });
-document.addEventListener('mouseup', e => {
-  if (!iconDragging) return;
-  iconDragging = false;
-  // Double-click detection: if barely moved and it was a second click fast → open
-  // We handle this via dblclick event instead
-});
+document.addEventListener('mouseup', () => { iconDrag = false; });
 
-// Single click = select, double click = open
+/* DESKTOP ICON DRAG — touch */
+desktopIco.addEventListener('touchstart', e => {
+  iconDrag = true; iconMoved = false;
+  const r = desktopIco.getBoundingClientRect();
+  iconDX = e.touches[0].clientX - r.left;
+  iconDY = e.touches[0].clientY - r.top;
+  desktopIco.classList.add('selected');
+  e.preventDefault();
+}, { passive: false });
+document.addEventListener('touchmove', e => {
+  if (!iconDrag) return;
+  iconMoved = true;
+  clampMove(desktopIco, e.touches[0].clientX - iconDX, e.touches[0].clientY - iconDY);
+}, { passive: false });
+document.addEventListener('touchend', () => { iconDrag = false; });
+
+/* click / dblclick to open */
 desktopIco.addEventListener('click', e => {
-  if (iconMoved) { iconMoved = false; return; } // was a drag, not a click
+  if (iconMoved) { iconMoved = false; return; }
   desktopIco.classList.add('selected');
 });
-desktopIco.addEventListener('dblclick', () => {
+desktopIco.addEventListener('dblclick', () => { if (!iconMoved) setWinState('open'); });
+
+/* tap to open on mobile (no dblclick on touch) */
+let lastTap = 0;
+desktopIco.addEventListener('touchend', e => {
   if (iconMoved) return;
-  setWinState('open');
+  const now = Date.now();
+  if (now - lastTap < 350) { setWinState('open'); e.preventDefault(); }
+  lastTap = now;
 });
-// Clicking elsewhere deselects
+
 document.addEventListener('click', e => {
   if (!desktopIco.contains(e.target)) desktopIco.classList.remove('selected');
 });
@@ -462,35 +534,32 @@ document.addEventListener('click', e => {
    TITLEBAR BUTTONS
 ============================================================ */
 document.getElementById('minBtn').addEventListener('click', e => {
-  e.stopPropagation();
-  setWinState('minimized');
+  e.stopPropagation(); setWinState('minimized');
 });
 document.getElementById('closeBtn').addEventListener('click', e => {
   e.stopPropagation();
   document.getElementById('closeOverlay').classList.add('show');
 });
 
-function cancelClose() { document.getElementById('closeOverlay').classList.remove('show'); }
+function cancelClose()  { document.getElementById('closeOverlay').classList.remove('show'); }
 function confirmClose() {
   document.getElementById('closeOverlay').classList.remove('show');
   setWinState('closed');
 }
 
 /* ============================================================
-   TASKBAR BUTTON
+   TASKBAR
 ============================================================ */
 function onTaskbarClick() {
   if (winState === 'open')      setWinState('minimized');
   else if (winState === 'minimized') setWinState('open');
-  // 'closed' state: taskbarBtn is hidden so this won't fire
 }
 
 /* ============================================================
-   COUNTER LOGIC
+   COUNTER
 ============================================================ */
 function updateDisplay() {
   display.textContent = count.toLocaleString();
-  statusCount.textContent = 'Count: ' + count.toLocaleString();
 }
 
 function increment() {
@@ -526,10 +595,8 @@ function resetCount() {
      <button class="win-btn" onclick="closeInfo()" style="min-width:80px">Annulla</button>`;
 }
 function doReset() {
-  count = 0;
-  localStorage.setItem('win64BaddiesCount', 0);
-  updateDisplay();
-  statusMsg.textContent = 'Counter reset. Goodbye, baddies.';
+  count = 0; localStorage.setItem('win64BaddiesCount', 0);
+  updateDisplay(); statusMsg.textContent = 'Counter reset. Goodbye, baddies.';
   closeInfo();
 }
 
@@ -544,10 +611,10 @@ function flash(cls) {
    INFO POPUP
 ============================================================ */
 function showInfo(title, icon, msg) {
-  document.getElementById('pTitle').textContent = title;
-  document.getElementById('pIcon').textContent  = icon;
+  document.getElementById('pTitle').textContent    = title;
+  document.getElementById('pIcon').textContent     = icon;
   document.getElementById('pBodyIcon').textContent = icon;
-  document.getElementById('pText').textContent  = msg;
+  document.getElementById('pText').textContent     = msg;
   document.getElementById('pBtns').innerHTML =
     `<button class="win-btn" onclick="closeInfo()" style="min-width:70px">OK</button>`;
   document.getElementById('infoOverlay').classList.add('show');
