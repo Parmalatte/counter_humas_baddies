@@ -53,7 +53,7 @@
   #desktopIcon .di-img { font-size:2.4rem; filter:drop-shadow(1px 1px 0 rgba(0,0,0,.6)); pointer-events:none; }
   #desktopIcon .di-label {
     font-size:.82rem; color:white; text-align:center;
-    text-shadow:1px 1px 2px black,-1px 0 2px black,0 -1px 2px black;
+    text-shadow:1px 1px 0px black,-1px 0 0px black,0 -1px 0px black;
     line-height:1.15; white-space:nowrap; pointer-events:none;
   }
 
@@ -576,8 +576,8 @@ function updateDisplay(){ display.textContent=count.toLocaleString(); }
 const incMsgs=['Baddie recorded.','Processing baddie...','Baddie added to registry.',
   'Writing to C:\\baddies.dat...','Saving... do not turn off.','Baddie.exe successfully run.',
   '🍌 Banana mode active.','Registering in HKEY_LOCAL_MACHINE...','DLL not found. Proceeding anyway.'];
-const decMsgs=['Baddie rimosso. 😢','Un baddie in meno...','Rimozione da C:\\baddies.dat...',
-  'Baddie eliminato dal registro.','Operazione completata. Tristezza.'];
+const decMsgs=['Baddie rimossa. 😢','Una baddie in meno...','Rimozione da C:\\baddies.dat...',
+  'Baddie eliminata dal registro.','Operazione completata. Tristezza.'];
 
 function addBaddie(){
   count++;
@@ -603,7 +603,7 @@ function checkMilestones(){
   if(count===100)  showInfo('CRITICAL ERROR 💥','💥','BANANA_KERNEL_PANIC\n\nToo many baddies.\nCount: '+count+'\n\nSystem may become unstable.');
   if(count===1000) showInfo('SCORE: 1000','🏆',
     '████████████████████\n'+
-    '█  CONGRATULAZIONI! █\n'+
+    '█      CONGRATULAZIONI!     █\n'+
     '████████████████████\n\n'+
     'Hai raggiunto 1000 BADDIES!\n\n'+
     'SCORE: 1000 pts\nRank: BADDIE MASTER 🍌\n\n'+
