@@ -45,7 +45,8 @@
   /* =====================================================
      PARTICLES
   ===================================================== */
-  #bananaLayer { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+  #bananaLayer { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:visible; }
+  #burstLayer  { position:fixed; inset:0; pointer-events:none; z-index:3; overflow:visible; }
   .bg-particle {
     position: absolute; opacity: 0;
     animation: bgFly linear infinite;
@@ -381,21 +382,21 @@
      BURST PARTICLES
   ===================================================== */
   .burst-particle {
-    position: fixed; pointer-events: none; z-index: 9999;
-    font-size: 1.6rem; line-height: 1;
+    position: fixed; pointer-events: none;
+    font-size: 2.4rem; line-height: 1;
     animation: burstFly var(--dur, .7s) ease-out forwards;
   }
   @keyframes burstFly {
-    0%   { transform: translate(0,0) scale(1.2) rotate(0deg); opacity: 1; }
-    100% { transform: translate(var(--bx),var(--by)) scale(.2) rotate(var(--br)); opacity: 0; }
+    0%   { transform: translate(0,0) scale(1.4) rotate(0deg); opacity: 1; }
+    100% { transform: translate(var(--bx),var(--by)) scale(.1) rotate(var(--br)); opacity: 0; }
   }
   .burst-particle.sad {
-    animation: sadFall var(--dur, .9s) ease-in forwards;
+    animation: sadFall var(--dur, .7s) ease-out forwards;
   }
   @keyframes sadFall {
-    0%   { transform: translate(0,0) scale(1); opacity: 1; }
-    60%  { opacity: .8; }
-    100% { transform: translate(var(--bx), var(--by)) scale(.5); opacity: 0; }
+    0%   { transform: translate(0,0) scale(1.2); opacity: 1; }
+    60%  { opacity: .9; }
+    100% { transform: translate(var(--bx), var(--by)) scale(.3); opacity: 0; }
   }
 
   /* =====================================================
@@ -441,6 +442,7 @@
 <body>
 
 <div id="bananaLayer"></div>
+<div id="burstLayer"></div>
 
 <div id="desktopIcon">
   <div class="di-img">🍌</div>
@@ -935,28 +937,34 @@ function burstEmoji(isAdd) {
   const emoji = currentBg !== 'none'
     ? (isAdd ? BG_EMOJIS[currentBg] || '🍌' : BURST_EMOJIS_SAD[Math.floor(Math.random()*BURST_EMOJIS_SAD.length)])
     : (isAdd ? '🍌' : '😢');
-  const count_b = isAdd ? 14 : 10;
-  // origin: center of counter display
-  const rect = display.getBoundingClientRect();
-  const ox = rect.left + rect.width / 2;
-  const oy = rect.top + rect.height / 2;
+  const count_b = isAdd ? 18 : 14;
+  const winRect = mainWin.getBoundingClientRect();
+  // origin = center of the window
+  const ox = winRect.left + winRect.width  / 2;
+  const oy = winRect.top  + winRect.height / 2;
+
   for (let i = 0; i < count_b; i++) {
     const el = document.createElement('div');
     el.className = 'burst-particle' + (isAdd ? '' : ' sad');
     el.textContent = emoji;
-    const angle = (Math.PI * 2 / count_b) * i + (Math.random() - .5) * .6;
-    const dist  = 80 + Math.random() * 140;
+
+    // explode outward from center in all directions
+    const angle = (Math.PI * 2 / count_b) * i + (Math.random() - .5) * .5;
+    const dist  = 250 + Math.random() * 350;
     const bx    = Math.cos(angle) * dist;
-    const by    = isAdd ? (Math.sin(angle) * dist) : (Math.abs(Math.sin(angle)) * 180 + 60);
-    const dur   = (.45 + Math.random() * .45) + 's';
-    const br    = (Math.random() * 720 - 360) + 'deg';
+    const by    = Math.sin(angle) * dist;
+
+    const dur = '0.7s';
+    const br  = (Math.random() * 540 - 270) + 'deg';
+
     el.style.left = ox + 'px';
     el.style.top  = oy + 'px';
     el.style.setProperty('--bx', bx + 'px');
-    el.style.setProperty('--by', (isAdd ? by : by) + 'px');
+    el.style.setProperty('--by', by + 'px');
     el.style.setProperty('--dur', dur);
     el.style.setProperty('--br', br);
-    document.body.appendChild(el);
+    // append to burstLayer: above background (z-index 3), behind window (z-index 5)
+    document.getElementById('burstLayer').appendChild(el);
     el.addEventListener('animationend', () => el.remove());
   }
 }
