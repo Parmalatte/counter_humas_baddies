@@ -62,33 +62,35 @@
   /* =====================================================
      DESKTOP ICON
   ===================================================== */
-  #desktopIcon {
-    position: absolute; top: 16px; left: 16px; z-index: 4;
+  .desktop-icon {
+    position: absolute; left: 16px; z-index: 4;
     display: flex; flex-direction: column; align-items: center;
     gap: 2px; width: 64px; padding: 4px 2px;
     border: 1px dotted transparent;
     touch-action: none; cursor: default;
   }
-  #desktopIcon.selected {
+  .desktop-icon.selected {
     border: 1px dotted white;
     background: rgba(0,0,128,0.5);
   }
-  #desktopIcon .di-img {
+  .desktop-icon .di-img {
     width: 32px; height: 32px;
     font-size: 28px; line-height: 32px; text-align: center;
     filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.8));
     pointer-events: none;
   }
-  #desktopIcon .di-label {
+  .desktop-icon .di-label {
     font-size: 13px; color: white; text-align: center;
     text-shadow:
       1px 1px 0 black, -1px 1px 0 black,
       1px -1px 0 black, -1px -1px 0 black;
     line-height: 1.1; white-space: nowrap; pointer-events: none;
   }
-  #desktopIcon.selected .di-label {
+  .desktop-icon.selected .di-label {
     background: var(--navy); color: white; outline: 1px dotted white;
   }
+  #desktopIcon  { top: 16px; }
+
 
   /* =====================================================
      WIN98 HELPERS
@@ -444,9 +446,14 @@
 <div id="bananaLayer"></div>
 <div id="burstLayer"></div>
 
-<div id="desktopIcon">
+<div id="desktopIcon" class="desktop-icon">
   <div class="di-img">🍌</div>
   <div class="di-label">counter.exe</div>
+</div>
+
+<div id="desktopIcon104" class="desktop-icon" style="top:90px; display:none;">
+  <div class="di-img">🖼️</div>
+  <div class="di-label">104.jpg</div>
 </div>
 
 <!-- CLOSE CONFIRM -->
@@ -519,9 +526,9 @@ Questa azione non può essere annullata.</div>
     </div>
   </div>
   <div id="imgWindowBody">
-    <img src="immagine.jpg" alt="immagine.jpg" onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=padding:20px;color:#0f0;font-family:VT323,monospace;font-size:14px;text-align:center>immagine.jpg<br><br>[Immagine non trovata]<br><br>Posiziona immagine.jpg<br>nella stessa cartella.</div>'">
+    <img src="104.jpg" alt="immagine.jpg" onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=padding:20px;color:#0f0;font-family:VT323,monospace;font-size:14px;text-align:center>104.jpg<br><br>[Immagine non trovata]<br><br>Posiziona immagine.jpg<br>nella stessa cartella.</div>'">
   </div>
-  <div id="imgWindowStatus"><span>immagine.jpg — 104 baddies raggiunto!</span></div>
+  <div id="imgWindowStatus"><span>104.jpg — 104 baddies raggiunto!</span></div>
 </div>
 
 <!-- MAIN WINDOW -->
@@ -601,11 +608,11 @@ Questa azione non può essere annullata.</div>
       <div class="btn-row">
         <div class="btn-wrap">
           <button class="win-btn primary" id="addBtn" onclick="addBaddie()">🍌 +1 Baddie</button>
-          <div class="tip">Aggiungi una baddie</div>
+          <div class="tip">Spazio o questo bottone</div>
         </div>
         <div class="btn-wrap">
           <button class="win-btn primary" id="removeBtn" onclick="removeBaddie()">😢 -1 Baddie</button>
-          <div class="tip">Rimuovi una baddie</div>
+          <div class="tip">Solo questo bottone</div>
         </div>
       </div>
     </div>
@@ -752,14 +759,11 @@ document.addEventListener('keydown', e => {
   if (e.ctrlKey && e.key === 'n') { e.preventDefault(); askNewCount(); }
   if (e.ctrlKey && e.key === 'c') { e.preventDefault(); doCopy(); }
   if (e.key === 'F1') { e.preventDefault(); showHelp(); }
-  if (e.key === '+' || e.key === '=') addBaddie();
-  if (e.key === '-') removeBaddie();
   if (e.key === ' ') { e.preventDefault(); if (!e.repeat) addBaddie(); }
 });
 
-/* ==========================================================
-   MENUS
-========================================================== */
+
+// Disabilitato: aggiunta/rimozione tramite click su finestra o sfondo
 let activeMenu = null;
 function toggleMenu(name) {
   const dd = document.getElementById('dd' + name);
@@ -872,6 +876,7 @@ function setBg(type) {
     if (el) el.classList.toggle('checked', k === type);
   });
   currentBg = type;
+  localStorage.setItem('win64BaddiesBg', type);
   bgParticles.forEach(p => p.remove());
   bgParticles = [];
   if (type === 'none') return;
@@ -911,7 +916,7 @@ function showHelp() {
 }
 function showShortcuts() {
   showInfo('Shortcuts', '⌨️',
-    'Ctrl+Z     Undo\nCtrl+Y     Redo\nCtrl+S     Save\nCtrl+N     New Count\nCtrl+C     Copy Count\nF1         Guida\n+           +1 Baddie\n-            -1 Baddie');
+    'Ctrl+Z     Undo\nCtrl+Y     Redo\nCtrl+S     Save\nCtrl+N     New Count\nCtrl+C     Copy Count\nF1         Guida\nSpazio     +1 Baddie\nClick win  +1 Baddie\nClick sfondo  -1 Baddie');
 }
 function showAbout() {
   showInfo('About counter.exe', '🍌',
@@ -991,14 +996,46 @@ function openImgWindow() {
   imgWin.classList.add('open');
   imgWin.style.left = Math.min(mainWin.offsetLeft + mainWin.offsetWidth + 10, window.innerWidth - 290) + 'px';
   imgWin.style.top  = (mainWin.offsetTop + 40) + 'px';
+
+  // show 104.jpg desktop icon (setup only once)
+  const ico104 = document.getElementById('desktopIcon104');
+  if (ico104.style.display === 'none' || ico104.style.display === '') {
+    ico104.style.display = 'flex';
+
+    ico104.addEventListener('click', e => { e.stopPropagation(); ico104.classList.add('selected'); });
+    document.addEventListener('click', e => { if (!ico104.contains(e.target)) ico104.classList.remove('selected'); });
+
+    let lastTap104 = 0;
+    ico104.addEventListener('dblclick', () => openImgWindow());
+    ico104.addEventListener('touchend', e => {
+      const now = Date.now();
+      if (now - lastTap104 < 350) { openImgWindow(); e.preventDefault(); }
+      lastTap104 = now;
+    });
+
+    let drag104 = false, dx104 = 0, dy104 = 0;
+    ico104.addEventListener('mousedown', e => {
+      drag104 = true;
+      const r = ico104.getBoundingClientRect(); dx104 = e.clientX - r.left; dy104 = e.clientY - r.top;
+      ico104.classList.add('selected'); e.preventDefault();
+    });
+    document.addEventListener('mousemove', e => {
+      if (!drag104) return;
+      clampMove(ico104, e.clientX - dx104, e.clientY - dy104);
+    });
+    document.addEventListener('mouseup', () => { drag104 = false; });
+  }
 }
 
 /* ==========================================================
    INIT
 ========================================================== */
-setBg('banana');
+const savedBg = localStorage.getItem('win64BaddiesBg') || 'banana';
+setBg(savedBg);
 updateDisplay();
 updateEditMenu();
+// restore 104 badge if already unlocked
+if (count >= 104) openImgWindow();
 </script>
 </body>
 </html>
