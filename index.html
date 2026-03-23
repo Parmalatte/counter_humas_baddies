@@ -1,258 +1,441 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>counter.exe</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
   :root {
-    --win-gray:   #c0c0c0;
-    --win-dark:   #808080;
-    --win-darker: #404040;
-    --win-white:  #ffffff;
-    --win-black:  #000000;
-    --win-blue:   #000080;
-    --win-hi:     #1084d0;
+    --gray:        #c0c0c0;
+    --light:       #e0e0e0;
+    --dark:        #808080;
+    --darker:      #404040;
+    --white:       #ffffff;
+    --black:       #000000;
+    --navy:        #000080;
+    --title-hi:    #1084d0;
+    --btn-face:    #c0c0c0;
+    --inset-dark:  #808080;
+    --inset-darkr: #404040;
+    --teal:        #008080;
+    --shadow:      #000000;
   }
 
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
   body {
-    background:#008080;
-    width:100vw; height:100vh;
-    overflow:hidden;
-    font-family:'VT323',monospace;
-    cursor:default;
-    user-select:none;
-    touch-action:none;
+    background: var(--teal);
+    width: 100vw; height: 100vh;
+    overflow: hidden;
+    font-family: 'VT323', 'Courier New', monospace;
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='19' viewBox='0 0 12 19'%3E%3Cpath d='M0 0 L0 15 L3 12 L5 17 L7 16 L5 11 L9 11 Z' fill='white' stroke='black' stroke-width='1'/%3E%3C/svg%3E") 0 0, default;
+    user-select: none;
+    touch-action: none;
+    background-image: repeating-linear-gradient(
+      0deg,
+      rgba(0,0,0,0.03) 0px,
+      rgba(0,0,0,0.03) 1px,
+      transparent 1px,
+      transparent 4px
+    );
   }
 
+  /* =====================================================
+     PARTICLES
+  ===================================================== */
   #bananaLayer { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
-  .bg-particle { position:absolute; opacity:0; animation:bgFly linear infinite; }
+  .bg-particle {
+    position: absolute; opacity: 0;
+    animation: bgFly linear infinite;
+    image-rendering: pixelated;
+  }
   @keyframes bgFly {
-    0%   { transform:translate(0,0) rotate(-10deg); opacity:0; }
-    8%   { opacity:.8; }
-    92%  { opacity:.8; }
-    100% { transform:translate(var(--dx),var(--dy)) rotate(20deg); opacity:0; }
+    0%   { transform: translate(0,0) rotate(-10deg); opacity: 0; }
+    8%   { opacity: .7; }
+    92%  { opacity: .7; }
+    100% { transform: translate(var(--dx),var(--dy)) rotate(20deg); opacity: 0; }
   }
 
-  /* Desktop icon */
+  /* =====================================================
+     DESKTOP ICON
+  ===================================================== */
   #desktopIcon {
-    position:absolute; top:16px; left:16px; z-index:4;
-    display:flex; flex-direction:column; align-items:center;
-    gap:3px; width:68px; padding:4px;
-    border:1px solid transparent; touch-action:none;
+    position: absolute; top: 16px; left: 16px; z-index: 4;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 2px; width: 64px; padding: 4px 2px;
+    border: 1px dotted transparent;
+    touch-action: none; cursor: default;
   }
   #desktopIcon.selected {
-    border-color:rgba(255,255,255,.5);
-    background:rgba(0,0,128,.35);
-    outline:1px dotted white;
+    border: 1px dotted white;
+    background: rgba(0,0,128,0.5);
   }
-  #desktopIcon .di-img { font-size:2.4rem; filter:drop-shadow(1px 1px 0 rgba(0,0,0,.6)); pointer-events:none; }
+  #desktopIcon .di-img {
+    width: 32px; height: 32px;
+    font-size: 28px; line-height: 32px; text-align: center;
+    filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.8));
+    pointer-events: none;
+  }
   #desktopIcon .di-label {
-    font-size:.82rem; color:white; text-align:center;
-    text-shadow:1px 1px 0px black,-1px 0 0px black,0 -1px 0px black;
-    line-height:1.15; white-space:nowrap; pointer-events:none;
+    font-size: 13px; color: white; text-align: center;
+    text-shadow:
+      1px 1px 0 black, -1px 1px 0 black,
+      1px -1px 0 black, -1px -1px 0 black;
+    line-height: 1.1; white-space: nowrap; pointer-events: none;
+  }
+  #desktopIcon.selected .di-label {
+    background: var(--navy); color: white; outline: 1px dotted white;
   }
 
-  /* Main window */
+  /* =====================================================
+     WIN98 HELPERS
+  ===================================================== */
+  .w98-raised {
+    background: var(--gray);
+    border-top: 2px solid var(--white); border-left: 2px solid var(--white);
+    border-right: 2px solid var(--darker); border-bottom: 2px solid var(--darker);
+    box-shadow: inset 1px 1px 0 var(--light), inset -1px -1px 0 var(--dark);
+  }
+  .w98-sunken {
+    background: var(--gray);
+    border-top: 2px solid var(--darker); border-left: 2px solid var(--darker);
+    border-right: 2px solid var(--white); border-bottom: 2px solid var(--white);
+    box-shadow: inset 1px 1px 0 var(--dark), inset -1px -1px 0 var(--light);
+  }
+
+  /* =====================================================
+     MAIN WINDOW
+  ===================================================== */
   #mainWindow {
-    position:absolute; z-index:5;
-    background:var(--win-gray);
-    border-top:2px solid var(--win-white);
-    border-left:2px solid var(--win-white);
-    border-right:2px solid var(--win-darker);
-    border-bottom:2px solid var(--win-darker);
-    box-shadow:2px 2px 0 var(--win-black);
-    touch-action:none;
+    position: absolute; z-index: 5;
+    background: var(--gray);
+    border-top: 2px solid var(--white); border-left: 2px solid var(--white);
+    border-right: 2px solid var(--darker); border-bottom: 2px solid var(--darker);
+    box-shadow: 1px 1px 0 var(--black), inset 1px 1px 0 var(--light);
+    touch-action: none;
   }
 
+  /* Title bar */
   #titlebar {
-    background:linear-gradient(90deg,var(--win-blue),var(--win-hi));
-    padding:4px 4px 4px 6px;
-    display:flex; align-items:center; justify-content:space-between;
-    cursor:grab; touch-action:none;
+    background: linear-gradient(90deg, var(--navy) 0%, var(--title-hi) 100%);
+    padding: 3px 3px 3px 5px;
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: grab; touch-action: none; height: 22px;
   }
-  #titlebar:active { cursor:grabbing; }
-  .tb-left { display:flex; align-items:center; gap:5px; pointer-events:none; overflow:hidden; }
-  .tb-icon { font-size:.9rem; flex-shrink:0; }
-  .tb-text { font-size:1rem; color:white; letter-spacing:.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .tb-btns { display:flex; gap:3px; pointer-events:all; flex-shrink:0; }
-
+  #titlebar:active { cursor: grabbing; }
+  .tb-left { display: flex; align-items: center; gap: 4px; pointer-events: none; overflow: hidden; flex: 1; }
+  .tb-icon { font-size: 14px; flex-shrink: 0; line-height: 1; }
+  .tb-text {
+    font-size: 13px; color: white; letter-spacing: 0;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    font-family: 'VT323', monospace;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+  }
+  .tb-btns { display: flex; gap: 2px; pointer-events: all; flex-shrink: 0; }
   .tb-btn {
-    width:18px; height:16px;
-    background:var(--win-gray);
-    border-top:1px solid var(--win-white); border-left:1px solid var(--win-white);
-    border-right:1px solid var(--win-darker); border-bottom:1px solid var(--win-darker);
-    font-size:.65rem; display:flex; align-items:center; justify-content:center;
-    cursor:pointer; color:black; line-height:1;
+    width: 16px; height: 14px;
+    background: var(--gray);
+    border-top: 1px solid var(--white); border-left: 1px solid var(--white);
+    border-right: 1px solid var(--darker); border-bottom: 1px solid var(--darker);
+    box-shadow: inset 1px 1px 0 var(--light);
+    font-size: 9px; font-family: 'Marlett', 'VT323', monospace;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: black; line-height: 1;
+    image-rendering: pixelated;
   }
   .tb-btn:active {
-    border-top:1px solid var(--win-darker); border-left:1px solid var(--win-darker);
-    border-right:1px solid var(--win-white); border-bottom:1px solid var(--win-white);
+    border-top: 1px solid var(--darker); border-left: 1px solid var(--darker);
+    border-right: 1px solid var(--white); border-bottom: 1px solid var(--white);
+    box-shadow: inset 1px 1px 0 var(--dark);
+    padding-top: 1px; padding-left: 1px;
   }
+  .tb-btn.close-btn { font-weight: bold; }
 
-  /* Menu bar */
+  /* =====================================================
+     MENU BAR
+  ===================================================== */
   .menubar {
-    background:var(--win-gray); border-bottom:1px solid var(--win-dark);
-    padding:0 2px; display:flex; position:relative; z-index:50;
+    background: var(--gray);
+    border-bottom: 1px solid var(--dark);
+    padding: 1px 2px 0;
+    display: flex; position: relative; z-index: 50;
+    font-size: 13px;
   }
-  .menu-wrap { position:relative; }
+  .menu-wrap { position: relative; }
   .menu-item {
-    font-size:1rem; padding:3px 10px 1px;
-    cursor:pointer; color:black; white-space:nowrap; display:block;
+    font-size: 13px; font-family: 'VT323', monospace;
+    padding: 2px 8px 1px;
+    cursor: default; color: black; white-space: nowrap; display: block;
   }
-  .menu-item:hover, .menu-item.open { background:var(--win-blue); color:white; }
+  .menu-item:hover, .menu-item.open { background: var(--navy); color: white; }
+  .menu-item .hotkey { text-decoration: underline; }
 
   .dropdown {
-    display:none;
-    position:absolute; top:100%; left:0;
-    background:var(--win-gray);
-    border-top:1px solid var(--win-white); border-left:1px solid var(--win-white);
-    border-right:1px solid var(--win-darker); border-bottom:1px solid var(--win-darker);
-    box-shadow:2px 2px 0 var(--win-black);
-    min-width:170px; z-index:100; white-space:nowrap;
+    display: none;
+    position: absolute; top: 100%; left: 0;
+    background: var(--gray);
+    border-top: 2px solid var(--white); border-left: 2px solid var(--white);
+    border-right: 2px solid var(--darker); border-bottom: 2px solid var(--darker);
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+    min-width: 180px; z-index: 100; white-space: nowrap;
+    padding: 2px 0;
   }
-  .dropdown.open { display:block; }
-
+  .dropdown.open { display: block; }
   .dd-item {
-    font-size:1rem; padding:3px 20px 1px 16px;
-    cursor:pointer; color:black; display:flex; align-items:center; gap:8px;
+    font-size: 13px; font-family: 'VT323', monospace;
+    padding: 2px 20px 1px 22px;
+    cursor: default; color: black;
+    display: flex; align-items: center; gap: 8px;
+    position: relative;
   }
-  .dd-item:hover { background:var(--win-blue); color:white; }
-  .dd-item.disabled { color:var(--win-dark); cursor:default; pointer-events:none; }
-  .dd-item.checked::before { content:'✓'; margin-right:4px; font-size:.9rem; }
-  .dd-item.checked { padding-left:6px; }
+  .dd-item:hover { background: var(--navy); color: white; }
+  .dd-item.disabled { color: var(--dark); pointer-events: none; }
+  .dd-item.checked::before { content: '✓'; position: absolute; left: 6px; font-size: 11px; }
+  .dd-shortcut { margin-left: auto; color: inherit; font-size: 12px; padding-left: 24px; opacity: 0.8; }
+  .dd-sep { height: 0; margin: 3px 4px; border-top: 1px solid var(--dark); border-bottom: 1px solid var(--white); }
 
-  .dd-sep {
-    height:0; margin:3px 4px;
-    border-top:1px solid var(--win-darker); border-bottom:1px solid var(--win-white);
-  }
-
-  /* Window content */
-  .win-content { padding:12px 14px 14px; display:flex; flex-direction:column; align-items:center; }
+  /* =====================================================
+     WINDOW CONTENT
+  ===================================================== */
+  .win-content { padding: 8px 10px 10px; display: flex; flex-direction: column; align-items: stretch; }
 
   .groupbox {
-    width:100%;
-    border-top:2px solid var(--win-darker); border-left:2px solid var(--win-darker);
-    border-right:2px solid var(--win-white); border-bottom:2px solid var(--win-white);
-    padding:10px 12px 14px; position:relative; margin-bottom:12px;
+    border-top: 1px solid var(--dark); border-left: 1px solid var(--dark);
+    border-right: 1px solid var(--white); border-bottom: 1px solid var(--white);
+    box-shadow: inset 1px 1px 0 var(--white), inset -1px -1px 0 var(--dark);
+    padding: 14px 12px 12px;
+    position: relative; margin-bottom: 8px;
   }
   .groupbox-label {
-    position:absolute; top:-11px; left:10px;
-    background:var(--win-gray); padding:0 4px; font-size:1rem; color:black;
+    position: absolute; top: -9px; left: 8px;
+    background: var(--gray); padding: 0 4px;
+    font-size: 13px; color: black; font-family: 'VT323', monospace;
   }
 
-  .app-title { font-size:1.4rem; color:black; text-align:center; line-height:1.1; margin-bottom:4px; }
-  .app-title .big { color:var(--win-blue); display:block; }
+  .app-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .app-header-icon { font-size: 32px; filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.5)); flex-shrink: 0; }
+  .app-header-text { flex: 1; }
+  .app-title-main { font-size: 18px; font-family: 'VT323', monospace; color: black; line-height: 1; letter-spacing: 0.5px; }
+  .app-title-sub { font-size: 13px; font-family: 'VT323', monospace; color: var(--dark); line-height: 1.2; }
 
+  /* Counter display */
   #counterDisplay {
-    width:100%; background:#000;
-    border-top:2px solid var(--win-darker); border-left:2px solid var(--win-darker);
-    border-right:2px solid var(--win-white); border-bottom:2px solid var(--win-white);
-    padding:6px 12px 4px; margin:8px 0 14px;
-    text-align:right;
-    font-family:'Share Tech Mono',monospace;
-    color:#00ff41; letter-spacing:.06em;
-    text-shadow:0 0 8px #00ff41,0 0 20px rgba(0,255,65,.4);
-    transition:color .05s,text-shadow .05s;
-    position:relative; overflow:hidden;
-    font-size:clamp(2.2rem,10vw,3.5rem);
+    width: 100%;
+    background: var(--white);
+    border-top: 2px solid var(--darker); border-left: 2px solid var(--darker);
+    border-right: 2px solid var(--white); border-bottom: 2px solid var(--white);
+    box-shadow: inset 1px 1px 0 var(--dark), inset -1px -1px 0 var(--light);
+    padding: 4px 10px 2px;
+    margin: 0 0 10px;
+    text-align: right;
+    font-family: 'VT323', monospace;
+    color: var(--black);
+    letter-spacing: 2px;
+    transition: none;
+    position: relative; overflow: hidden;
+    font-size: clamp(2.8rem, 11vw, 4.2rem);
+    line-height: 1.1;
   }
-  #counterDisplay::before {
-    content:''; position:absolute; inset:0;
-    background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,255,65,.04) 3px,rgba(0,255,65,.04) 4px);
-    pointer-events:none;
-  }
-  #counterDisplay.flash-up   { color:#ccff00; text-shadow:0 0 18px #ccff00,0 0 40px rgba(200,255,0,.9); }
-  #counterDisplay.flash-down { color:#ff4444; text-shadow:0 0 18px #ff4444,0 0 40px rgba(255,50,50,.8); }
 
-  .btn-row { display:flex; gap:6px; width:100%; justify-content:center; flex-wrap:wrap; }
+
+  /* Button row */
+  .btn-row { display: flex; gap: 6px; width: 100%; justify-content: center; flex-wrap: wrap; }
+
+  .win-sep { height: 0; margin: 6px 0; border-top: 1px solid var(--dark); border-bottom: 1px solid var(--white); }
 
   .win-btn {
-    font-family:'VT323',monospace;
-    padding:6px 10px 4px;
-    background:var(--win-gray);
-    border-top:2px solid var(--win-white); border-left:2px solid var(--win-white);
-    border-right:2px solid var(--win-darker); border-bottom:2px solid var(--win-darker);
-    cursor:pointer; color:black;
-    letter-spacing:.02em; outline:none; white-space:nowrap;
-    font-size:clamp(.95rem,3.5vw,1.15rem);
-    min-width:clamp(70px,22vw,90px);
-    touch-action:manipulation;
+    font-family: 'VT323', monospace;
+    font-size: clamp(14px, 3.5vw, 15px);
+    padding: 4px 12px 2px;
+    background: var(--gray);
+    border-top: 2px solid var(--white); border-left: 2px solid var(--white);
+    border-right: 2px solid var(--darker); border-bottom: 2px solid var(--darker);
+    box-shadow: inset 1px 1px 0 var(--light), inset -1px -1px 0 var(--dark);
+    cursor: default; color: black;
+    outline: none; white-space: nowrap;
+    min-width: clamp(80px, 22vw, 100px);
+    touch-action: manipulation;
+    letter-spacing: 0.3px; height: 28px;
+    display: flex; align-items: center; justify-content: center; gap: 4px;
   }
-  .win-btn:focus { outline:1px dotted black; outline-offset:-4px; }
-  .win-btn:active {
-    border-top:2px solid var(--win-darker); border-left:2px solid var(--win-darker);
-    border-right:2px solid var(--win-white); border-bottom:2px solid var(--win-white);
-    padding-top:7px; padding-left:12px;
+  .win-btn:focus { outline: 1px dotted black; outline-offset: -4px; }
+  .win-btn:active, .win-btn.pressed {
+    border-top: 2px solid var(--darker); border-left: 2px solid var(--darker);
+    border-right: 2px solid var(--white); border-bottom: 2px solid var(--white);
+    box-shadow: inset 1px 1px 0 var(--dark), inset -1px -1px 0 var(--light);
+    padding-top: 5px; padding-left: 14px;
   }
-  .win-btn.primary { font-size:clamp(1rem,4vw,1.25rem); min-width:clamp(100px,28vw,130px); }
-  .win-btn:disabled { color:var(--win-dark); cursor:default; }
+  .win-btn.primary {
+    min-width: clamp(110px, 28vw, 140px);
+    font-size: clamp(15px, 4vw, 16px);
+    outline: 1px solid black; outline-offset: -4px;
+  }
+  .win-btn.primary:active {
+    border-top: 2px solid var(--darker); border-left: 2px solid var(--darker);
+    border-right: 2px solid var(--white); border-bottom: 2px solid var(--white);
+  }
+  .win-btn:disabled { color: var(--dark); cursor: default; text-shadow: 1px 1px 0 var(--white); }
 
+  /* =====================================================
+     STATUS BAR
+  ===================================================== */
   .statusbar {
-    border-top:1px solid var(--win-dark); background:var(--win-gray);
-    display:flex; gap:4px; padding:2px 4px; font-size:.82rem; color:black;
+    border-top: 1px solid var(--dark);
+    background: var(--gray);
+    display: flex; gap: 2px;
+    padding: 2px 3px 2px;
+    font-size: 12px; color: black; font-family: 'VT323', monospace;
   }
   .status-panel {
-    border-top:1px solid var(--win-darker); border-left:1px solid var(--win-darker);
-    border-right:1px solid var(--win-white); border-bottom:1px solid var(--win-white);
-    padding:1px 6px; flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
+    border-top: 1px solid var(--darker); border-left: 1px solid var(--darker);
+    border-right: 1px solid var(--white); border-bottom: 1px solid var(--white);
+    padding: 1px 6px 0;
+    flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    font-size: 13px; min-height: 18px; display: flex; align-items: center;
   }
 
-  /* Taskbar */
+  /* =====================================================
+     TASKBAR
+  ===================================================== */
   #taskbar {
-    position:fixed; bottom:0; left:0; right:0; height:30px;
-    background:var(--win-gray); border-top:2px solid var(--win-white);
-    display:flex; align-items:center; z-index:10; padding:0 4px; gap:4px;
+    position: fixed; bottom: 0; left: 0; right: 0; height: 28px;
+    background: var(--gray);
+    border-top: 2px solid var(--white);
+    box-shadow: inset 0 1px 0 var(--light);
+    display: flex; align-items: center;
+    z-index: 10; padding: 2px 2px; gap: 2px;
   }
+  #taskbarSep { width: 2px; height: 18px; border-left: 1px solid var(--dark); border-right: 1px solid var(--white); margin: 0 2px; }
   #taskbarBtn {
-    font-family:'VT323',monospace; font-size:.88rem;
-    height:22px; padding:2px 8px 0;
-    background:var(--win-gray);
-    display:flex; align-items:center; gap:4px; color:black; cursor:pointer;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    max-width:55vw; touch-action:manipulation;
-    border-top:2px solid var(--win-darker); border-left:2px solid var(--win-darker);
-    border-right:2px solid var(--win-white); border-bottom:2px solid var(--win-white);
+    font-family: 'VT323', monospace; font-size: 13px;
+    height: 22px; padding: 1px 8px 0;
+    background: var(--gray);
+    display: flex; align-items: center; gap: 4px;
+    color: black; cursor: default;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 55vw; touch-action: manipulation;
+    border-top: 1px solid var(--darker); border-left: 1px solid var(--darker);
+    border-right: 1px solid var(--white); border-bottom: 1px solid var(--white);
+    box-shadow: inset 1px 1px 0 var(--dark);
+    outline: 1px dotted black; outline-offset: -3px;
   }
   #taskbarBtn.inactive {
-    border-top:2px solid var(--win-white); border-left:2px solid var(--win-white);
-    border-right:2px solid var(--win-darker); border-bottom:2px solid var(--win-darker);
+    border-top: 1px solid var(--white); border-left: 1px solid var(--white);
+    border-right: 1px solid var(--darker); border-bottom: 1px solid var(--darker);
+    box-shadow: inset 1px 1px 0 var(--light); outline: none;
   }
-  #taskbarBtn.hidden { display:none; }
-  #taskClock {
-    margin-left:auto; font-family:'VT323',monospace; font-size:.88rem;
-    height:22px; padding:2px 6px 0; flex-shrink:0;
-    border-top:1px solid var(--win-darker); border-left:1px solid var(--win-darker);
-    border-right:1px solid var(--win-white); border-bottom:1px solid var(--win-white);
-    display:flex; align-items:center; color:black;
+  #taskbarBtn.hidden { display: none; }
+  #notifArea {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 2px; padding: 0 4px;
+    border-top: 1px solid var(--darker); border-left: 1px solid var(--darker);
+    border-right: 1px solid var(--white); border-bottom: 1px solid var(--white);
+    box-shadow: inset 1px 1px 0 var(--dark); height: 22px;
   }
+  #taskClock { font-family: 'VT323', monospace; font-size: 13px; color: black; display: flex; align-items: center; padding: 0 4px; }
+  #taskVolume { font-size: 12px; cursor: default; }
 
-  /* Popups */
-  .pop-overlay {
-    position:fixed; inset:0; z-index:200;
-    display:none; align-items:center; justify-content:center; padding:16px;
-  }
-  .pop-overlay.show { display:flex; }
+  /* =====================================================
+     POPUPS
+  ===================================================== */
+  .pop-overlay { position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center; padding: 16px; }
+  .pop-overlay.show { display: flex; }
   .popup {
-    background:var(--win-gray);
-    border-top:2px solid var(--win-white); border-left:2px solid var(--win-white);
-    border-right:2px solid var(--win-darker); border-bottom:2px solid var(--win-darker);
-    width:100%; max-width:360px;
-    box-shadow:3px 3px 0 var(--win-black);
+    background: var(--gray);
+    border-top: 2px solid var(--white); border-left: 2px solid var(--white);
+    border-right: 2px solid var(--darker); border-bottom: 2px solid var(--darker);
+    box-shadow: 2px 2px 0 var(--black), inset 1px 1px 0 var(--light);
+    width: 100%; max-width: 340px;
   }
   .pop-title {
-    background:linear-gradient(90deg,var(--win-blue),var(--win-hi));
-    padding:4px; display:flex; justify-content:space-between; align-items:center;
-    font-size:1rem; color:white;
+    background: linear-gradient(90deg, var(--navy) 0%, var(--title-hi) 100%);
+    padding: 3px 3px 3px 5px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; color: white; height: 22px;
+    font-family: 'VT323', monospace;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
   }
-  .pop-body { padding:14px 16px 10px; display:flex; align-items:flex-start; gap:12px; }
-  .pop-icon { font-size:2rem; flex-shrink:0; }
-  .pop-text { font-size:1rem; line-height:1.35; color:black; white-space:pre-wrap; }
-  .pop-btns { display:flex; justify-content:center; gap:8px; padding:6px 16px 14px; }
+  .pop-body { padding: 16px 14px 8px; display: flex; align-items: flex-start; gap: 12px; }
+  .pop-icon { font-size: 32px; flex-shrink: 0; width: 32px; height: 32px; line-height: 32px; }
+  .pop-text { font-size: 14px; font-family: 'VT323', monospace; line-height: 1.4; color: black; white-space: pre-wrap; flex: 1; }
+  .pop-btns { display: flex; justify-content: center; gap: 8px; padding: 4px 14px 12px; }
+
+  /* =====================================================
+     TOOLTIP
+  ===================================================== */
+  .tip {
+    position: absolute; bottom: calc(100% + 4px); left: 50%;
+    transform: translateX(-50%);
+    background: #ffffcc; border: 1px solid var(--black);
+    padding: 2px 4px; font-size: 12px; font-family: 'VT323', monospace;
+    color: black; white-space: nowrap;
+    pointer-events: none; z-index: 999; display: none;
+    box-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+  }
+  .btn-wrap:hover .tip { display: block; }
+  .btn-wrap { position: relative; }
+
+  /* =====================================================
+     BURST PARTICLES
+  ===================================================== */
+  .burst-particle {
+    position: fixed; pointer-events: none; z-index: 9999;
+    font-size: 1.6rem; line-height: 1;
+    animation: burstFly var(--dur, .7s) ease-out forwards;
+  }
+  @keyframes burstFly {
+    0%   { transform: translate(0,0) scale(1.2) rotate(0deg); opacity: 1; }
+    100% { transform: translate(var(--bx),var(--by)) scale(.2) rotate(var(--br)); opacity: 0; }
+  }
+  .burst-particle.sad {
+    animation: sadFall var(--dur, .9s) ease-in forwards;
+  }
+  @keyframes sadFall {
+    0%   { transform: translate(0,0) scale(1); opacity: 1; }
+    60%  { opacity: .8; }
+    100% { transform: translate(var(--bx), var(--by)) scale(.5); opacity: 0; }
+  }
+
+  /* =====================================================
+     IMAGE WINDOW
+  ===================================================== */
+  #imgWindow {
+    position: absolute; z-index: 6;
+    background: var(--gray);
+    border-top: 2px solid var(--white); border-left: 2px solid var(--white);
+    border-right: 2px solid var(--darker); border-bottom: 2px solid var(--darker);
+    box-shadow: 2px 2px 0 var(--black), inset 1px 1px 0 var(--light);
+    display: none; touch-action: none; width: 280px;
+  }
+  #imgWindow.open { display: block; }
+  #imgWindowTitlebar {
+    background: linear-gradient(90deg, var(--navy) 0%, var(--title-hi) 100%);
+    padding: 3px 3px 3px 5px;
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: grab; touch-action: none; height: 22px;
+  }
+  #imgWindowTitlebar:active { cursor: grabbing; }
+  .imgtb-left { display: flex; align-items: center; gap: 4px; pointer-events: none; }
+  .imgtb-text { font-size: 13px; color: white; font-family: 'VT323', monospace; text-shadow: 1px 1px 0 rgba(0,0,0,0.4); }
+  #imgWindowBody {
+    padding: 4px; margin: 6px;
+    background: black;
+    border-top: 2px solid var(--darker); border-left: 2px solid var(--darker);
+    border-right: 2px solid var(--white); border-bottom: 2px solid var(--white);
+  }
+  #imgWindowBody img { width: 100%; display: block; }
+  #imgWindowStatus {
+    border-top: 1px solid var(--dark); padding: 2px 3px;
+  }
+  #imgWindowStatus span {
+    border-top: 1px solid var(--darker); border-left: 1px solid var(--darker);
+    border-right: 1px solid var(--white); border-bottom: 1px solid var(--white);
+    padding: 1px 6px 0; display: block;
+    font-size: 13px; font-family: 'VT323', monospace; color: black;
+    min-height: 18px;
+  }
 </style>
 </head>
 <body>
@@ -268,8 +451,8 @@
 <div class="pop-overlay" id="closeOverlay">
   <div class="popup">
     <div class="pop-title">
-      <span>⚠️ counter.exe</span>
-      <div class="tb-btn" onclick="cancelClose()">✕</div>
+      <span>counter.exe</span>
+      <div class="tb-btn close-btn" onclick="cancelClose()">✕</div>
     </div>
     <div class="pop-body">
       <div class="pop-icon">⚠️</div>
@@ -288,8 +471,8 @@ Il contatore verrà salvato e rimarrà aggiornato.</div>
 <div class="pop-overlay" id="newCountOverlay">
   <div class="popup">
     <div class="pop-title">
-      <span>⚠️ New Count</span>
-      <div class="tb-btn" onclick="document.getElementById('newCountOverlay').classList.remove('show')">✕</div>
+      <span>New Count</span>
+      <div class="tb-btn close-btn" onclick="document.getElementById('newCountOverlay').classList.remove('show')">✕</div>
     </div>
     <div class="pop-body">
       <div class="pop-icon">⚠️</div>
@@ -309,17 +492,34 @@ Questa azione non può essere annullata.</div>
 <div class="pop-overlay" id="infoOverlay">
   <div class="popup">
     <div class="pop-title">
-      <span><span id="pIcon">⚠️</span> <span id="pTitle">counter.exe</span></span>
-      <div class="tb-btn" onclick="closeInfo()">✕</div>
+      <span><span id="pTitle">counter.exe</span></span>
+      <div class="tb-btn close-btn" onclick="closeInfo()">✕</div>
     </div>
     <div class="pop-body">
       <div class="pop-icon" id="pBodyIcon">⚠️</div>
       <div class="pop-text" id="pText"></div>
     </div>
     <div class="pop-btns" id="pBtns">
-      <button class="win-btn" onclick="closeInfo()" style="min-width:70px">OK</button>
+      <button class="win-btn" onclick="closeInfo()" style="min-width:80px">OK</button>
     </div>
   </div>
+</div>
+
+<!-- IMAGE WINDOW -->
+<div id="imgWindow">
+  <div id="imgWindowTitlebar">
+    <div class="imgtb-left">
+      <span style="font-size:14px">🖼️</span>
+      <span class="imgtb-text">immagine.jpg — Visualizzatore immagini</span>
+    </div>
+    <div class="tb-btns">
+      <div class="tb-btn close-btn" onclick="document.getElementById('imgWindow').classList.remove('open')">✕</div>
+    </div>
+  </div>
+  <div id="imgWindowBody">
+    <img src="immagine.jpg" alt="immagine.jpg" onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=padding:20px;color:#0f0;font-family:VT323,monospace;font-size:14px;text-align:center>immagine.jpg<br><br>[Immagine non trovata]<br><br>Posiziona immagine.jpg<br>nella stessa cartella.</div>'">
+  </div>
+  <div id="imgWindowStatus"><span>immagine.jpg — 104 baddies raggiunto!</span></div>
 </div>
 
 <!-- MAIN WINDOW -->
@@ -330,70 +530,81 @@ Questa azione non può essere annullata.</div>
       <span class="tb-text">Counter Humas Baddies — counter.exe</span>
     </div>
     <div class="tb-btns">
-      <div class="tb-btn" id="minBtn">_</div>
-      <div class="tb-btn">□</div>
-      <div class="tb-btn" id="closeBtn">✕</div>
+      <div class="tb-btn" id="minBtn" title="Minimize">_</div>
+      <div class="tb-btn" title="Maximize">□</div>
+      <div class="tb-btn close-btn" id="closeBtn" title="Close">✕</div>
     </div>
   </div>
 
   <div class="menubar" id="menubar">
-
-    <!-- FILE -->
     <div class="menu-wrap" id="mwFile">
-      <div class="menu-item" id="miFile" onclick="toggleMenu('File')">File</div>
+      <div class="menu-item" id="miFile" onclick="toggleMenu('File')"><span class="hotkey">F</span>ile</div>
       <div class="dropdown" id="ddFile">
-        <div class="dd-item" onclick="closeMenus(); askNewCount()">New Count</div>
-        <div class="dd-item" onclick="closeMenus(); showInfo('Save Count','💾','Contatore salvato!\n\nFile: C:\\baddies\\count.dat\nCount: ' + count + '\nStatus: OK')">Save Count</div>
+        <div class="dd-item" onclick="closeMenus(); askNewCount()"><span>New Count</span><span class="dd-shortcut">Ctrl+N</span></div>
+        <div class="dd-item" onclick="closeMenus(); doSave()"><span>Save Count</span><span class="dd-shortcut">Ctrl+S</span></div>
         <div class="dd-sep"></div>
         <div class="dd-item" onclick="closeMenus(); document.getElementById('closeBtn').click()">Exit</div>
       </div>
     </div>
 
-    <!-- EDIT -->
     <div class="menu-wrap" id="mwEdit">
-      <div class="menu-item" id="miEdit" onclick="toggleMenu('Edit')">Edit</div>
+      <div class="menu-item" id="miEdit" onclick="toggleMenu('Edit')"><span class="hotkey">E</span>dit</div>
       <div class="dropdown" id="ddEdit">
-        <div class="dd-item" id="undoItem" onclick="closeMenus(); undoAction()">Undo</div>
-        <div class="dd-item" id="redoItem" onclick="closeMenus(); redoAction()">Redo</div>
+        <div class="dd-item" id="undoItem" onclick="closeMenus(); undoAction()"><span><span class="hotkey">U</span>ndo</span><span class="dd-shortcut">Ctrl+Z</span></div>
+        <div class="dd-item" id="redoItem" onclick="closeMenus(); redoAction()"><span><span class="hotkey">R</span>edo</span><span class="dd-shortcut">Ctrl+Y</span></div>
         <div class="dd-sep"></div>
-        <div class="dd-item" onclick="closeMenus(); doCopy()">Copy Count</div>
+        <div class="dd-item" onclick="closeMenus(); doCopy()"><span><span class="hotkey">C</span>opy Count</span><span class="dd-shortcut">Ctrl+C</span></div>
       </div>
     </div>
 
-    <!-- VIEW -->
     <div class="menu-wrap" id="mwView">
-      <div class="menu-item" id="miView" onclick="toggleMenu('View')">View</div>
+      <div class="menu-item" id="miView" onclick="toggleMenu('View')"><span class="hotkey">V</span>iew</div>
       <div class="dropdown" id="ddView">
-        <div class="dd-item checked" id="bgOptBanana" onclick="setBg('banana')">Banane</div>
-        <div class="dd-item" id="bgOptKebab"   onclick="setBg('kebab')">Habibi</div>
-        <div class="dd-item" id="bgOptFire"    onclick="setBg('fire')">Fire</div>
-        <div class="dd-item" id="bgOptPak"     onclick="setBg('pakistan')">Bongi Tronky</div>
+        <div class="dd-item checked" id="bgOptBanana"   onclick="setBg('banana')">🍌 Banane</div>
+        <div class="dd-item"         id="bgOptKebab"    onclick="setBg('kebab')">🌯 Habibi</div>
+        <div class="dd-item"         id="bgOptFire"     onclick="setBg('fire')">🔥 Fire</div>
+        <div class="dd-item"         id="bgOptPakistan" onclick="setBg('pakistan')">🇵🇰 Bongi Tronky</div>
         <div class="dd-sep"></div>
-        <div class="dd-item" id="bgOptNone"    onclick="setBg('none')">Nessuno</div>
+        <div class="dd-item"         id="bgOptNone"     onclick="setBg('none')">Nessuno</div>
       </div>
     </div>
 
-    <!-- HELP -->
     <div class="menu-wrap" id="mwHelp">
-      <div class="menu-item" id="miHelp" onclick="toggleMenu('Help')">Help</div>
+      <div class="menu-item" id="miHelp" onclick="toggleMenu('Help')"><span class="hotkey">H</span>elp</div>
       <div class="dropdown" id="ddHelp">
-        <div class="dd-item" onclick="closeMenus(); showInfo('Come usare','❓','1. Clicca +1 Baddie per aggiungere\n2. Clicca -1 Baddie per rimuovere\n3. Edit > Undo/Redo per correggere\n4. _ per minimizzare\n5. X per chiudere\n\nDoppio click icona per riaprire.')">Come usare</div>
-        <div class="dd-item" onclick="closeMenus(); showInfo('Shortcuts','❓','Click sui pulsanti per contare.\nTrascina la finestra dal titolo.\nTrascina l\'icona sul desktop.\nEdit > Undo/Redo: fino a 5 mosse.')">Shortcuts</div>
+        <div class="dd-item" onclick="closeMenus(); showHelp()">Come usare<span class="dd-shortcut">F1</span></div>
+        <div class="dd-item" onclick="closeMenus(); showShortcuts()">Shortcuts</div>
         <div class="dd-sep"></div>
-        <div class="dd-item" onclick="closeMenus(); showInfo('About','🍌','Counter Humas Baddies v1.0\n(c) 1998 HumasCorp Ltd.\n\nAll baddies reserved.')">About</div>
+        <div class="dd-item" onclick="closeMenus(); showAbout()">About counter.exe</div>
       </div>
     </div>
-
   </div>
 
   <div class="win-content">
     <div class="groupbox">
       <div class="groupbox-label">Baddie Counter</div>
-      <div class="app-title">COUNTER<span class="big">HUMAS BADDIES</span></div>
+
+      <div class="app-header">
+        <div class="app-header-icon">🍌</div>
+        <div class="app-header-text">
+          <div class="app-title-main">COUNTER HUMAS BADDIES</div>
+          <div class="app-title-sub">HumasCorp Ltd. — v1.0 (1998)</div>
+        </div>
+      </div>
+
+      <div class="win-sep"></div>
+
       <div id="counterDisplay">0</div>
+
       <div class="btn-row">
-        <button class="win-btn primary" onclick="addBaddie()">🍌 +1 Baddie</button>
-        <button class="win-btn primary" onclick="removeBaddie()">😢 -1 Baddie</button>
+        <div class="btn-wrap">
+          <button class="win-btn primary" id="addBtn" onclick="addBaddie()">🍌 +1 Baddie</button>
+          <div class="tip">Aggiungi una baddie</div>
+        </div>
+        <div class="btn-wrap">
+          <button class="win-btn primary" id="removeBtn" onclick="removeBaddie()">😢 -1 Baddie</button>
+          <div class="tip">Rimuovi una baddie</div>
+        </div>
       </div>
     </div>
   </div>
@@ -405,298 +616,381 @@ Questa azione non può essere annullata.</div>
 
 <!-- TASKBAR -->
 <div id="taskbar">
-  <div id="taskbarBtn" onclick="onTaskbarClick()">🍌 counter.exe</div>
-  <div id="taskClock">00:00</div>
+  <div id="taskbarBtn" onclick="onTaskbarClick()">
+    <span style="font-size:13px">🍌</span>&nbsp;counter.exe
+  </div>
+  <div id="taskbarSep"></div>
+  <div id="notifArea">
+    <span id="taskVolume">🔊</span>
+    <div id="taskClock">00:00</div>
+  </div>
 </div>
 
 <script>
-/* ============================================================
+/* ==========================================================
    STATE
-============================================================ */
-let count = parseInt(localStorage.getItem('win64BaddiesCount') || '0');
+========================================================== */
+let count   = parseInt(localStorage.getItem('win64BaddiesCount') || '0');
 const display    = document.getElementById('counterDisplay');
 const statusMsg  = document.getElementById('statusMsg');
 const mainWin    = document.getElementById('mainWindow');
 const desktopIco = document.getElementById('desktopIcon');
 const taskBtn    = document.getElementById('taskbarBtn');
 
-// Undo/Redo history — stores snapshots of count, max 5 undo steps
-// history[histIdx] = current state
-let history  = [count];
-let histIdx  = 0;
-const MAX_HIST = 6; // 5 undos = 6 entries
+let history = [count];
+let histIdx = 0;
+const MAX_HIST = 6;
 
-function pushHistory(newCount) {
-  // discard any redo states ahead
+function pushHistory(n) {
   history = history.slice(0, histIdx + 1);
-  history.push(newCount);
-  if(history.length > MAX_HIST) history.shift();
+  history.push(n);
+  if (history.length > MAX_HIST) history.shift();
   histIdx = history.length - 1;
   updateEditMenu();
 }
-
 function updateEditMenu() {
   document.getElementById('undoItem').classList.toggle('disabled', histIdx <= 0);
   document.getElementById('redoItem').classList.toggle('disabled', histIdx >= history.length - 1);
 }
-
 function undoAction() {
-  if(histIdx <= 0) return;
+  if (histIdx <= 0) return;
   histIdx--;
   count = history[histIdx];
-  localStorage.setItem('win64BaddiesCount', count);
-  updateDisplay(); flash('flash-down');
-  statusMsg.textContent = 'Undo. Count: ' + count;
-  updateEditMenu();
+  save(); updateDisplay();
+  setStatus('Undo. Count: ' + count);
 }
-
 function redoAction() {
-  if(histIdx >= history.length - 1) return;
+  if (histIdx >= history.length - 1) return;
   histIdx++;
   count = history[histIdx];
-  localStorage.setItem('win64BaddiesCount', count);
-  updateDisplay(); flash('flash-up');
-  statusMsg.textContent = 'Redo. Count: ' + count;
-  updateEditMenu();
+  save(); updateDisplay();
+  setStatus('Redo. Count: ' + count);
 }
 
 let winState = 'open';
-
 function setWinState(s) {
   winState = s;
-  if(s === 'open') {
-    mainWin.style.display = '';
-    taskBtn.classList.remove('hidden','inactive');
-  } else if(s === 'minimized') {
-    mainWin.style.display = 'none';
-    taskBtn.classList.remove('hidden');
-    taskBtn.classList.add('inactive');
-  } else {
-    mainWin.style.display = 'none';
-    taskBtn.classList.add('hidden');
-    taskBtn.classList.remove('inactive');
-  }
+  if (s === 'open')           { mainWin.style.display = ''; taskBtn.classList.remove('hidden','inactive'); }
+  else if (s === 'minimized') { mainWin.style.display = 'none'; taskBtn.classList.remove('hidden'); taskBtn.classList.add('inactive'); }
+  else                        { mainWin.style.display = 'none'; taskBtn.classList.add('hidden'); taskBtn.classList.remove('inactive'); }
 }
+function save() { localStorage.setItem('win64BaddiesCount', count); }
 
-/* ============================================================
+/* ==========================================================
    SIZING & CENTERING
-============================================================ */
-function sizeWindow() { mainWin.style.width = Math.min(window.innerWidth - 16, 460) + 'px'; }
+========================================================== */
+function sizeWindow() {
+  const isMobile = window.innerWidth < 600;
+  mainWin.style.width = Math.min(window.innerWidth - (isMobile ? 60 : 16), isMobile ? 280 : 440) + 'px';
+}
 function centerWindow() {
   sizeWindow();
-  mainWin.style.left = Math.max(4,(window.innerWidth - mainWin.offsetWidth)/2) + 'px';
-  mainWin.style.top  = Math.max(4,(window.innerHeight - 30 - mainWin.offsetHeight)/2) + 'px';
+  mainWin.style.left = Math.max(4, (window.innerWidth  - mainWin.offsetWidth)  / 2) + 'px';
+  mainWin.style.top  = Math.max(4, (window.innerHeight - 30 - mainWin.offsetHeight) / 2) + 'px';
 }
 window.addEventListener('resize', () => { sizeWindow(); clampPos(mainWin); });
-window.addEventListener('load', () => { centerWindow(); updateDisplay(); updateEditMenu(); });
+window.addEventListener('load',   () => { centerWindow(); updateDisplay(); updateEditMenu(); });
 
 function clampPos(el) {
-  el.style.left = Math.max(0,Math.min(parseFloat(el.style.left)||0, window.innerWidth-el.offsetWidth)) + 'px';
-  el.style.top  = Math.max(0,Math.min(parseFloat(el.style.top) ||0, window.innerHeight-30-el.offsetHeight)) + 'px';
+  el.style.left = Math.max(0, Math.min(parseFloat(el.style.left)||0, window.innerWidth  - el.offsetWidth))  + 'px';
+  el.style.top  = Math.max(0, Math.min(parseFloat(el.style.top) ||0, window.innerHeight - 30 - el.offsetHeight)) + 'px';
 }
 
-/* ============================================================
+/* ==========================================================
    DRAG — window
-============================================================ */
-let dragging=false, dragOX=0, dragOY=0;
-function startDrag(cx,cy){ dragging=true; const r=mainWin.getBoundingClientRect(); dragOX=cx-r.left; dragOY=cy-r.top; }
-function moveDrag(cx,cy){ if(!dragging) return; clampMove(mainWin,cx-dragOX,cy-dragOY); }
+========================================================== */
+let dragging = false, dragOX = 0, dragOY = 0;
+function startDrag(cx, cy) { dragging = true; const r = mainWin.getBoundingClientRect(); dragOX = cx - r.left; dragOY = cy - r.top; }
+function moveDrag(cx, cy)  { if (!dragging) return; clampMove(mainWin, cx - dragOX, cy - dragOY); }
+document.getElementById('titlebar').addEventListener('mousedown', e => { if (e.target.classList.contains('tb-btn')) return; startDrag(e.clientX, e.clientY); e.preventDefault(); });
+document.addEventListener('mousemove', e => { if (dragging) moveDrag(e.clientX, e.clientY); });
+document.addEventListener('mouseup',   () => { dragging = false; });
+document.getElementById('titlebar').addEventListener('touchstart', e => { if (e.target.classList.contains('tb-btn')) return; startDrag(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, { passive: false });
+document.addEventListener('touchmove', e => { if (dragging) { moveDrag(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); } }, { passive: false });
+document.addEventListener('touchend',  () => { dragging = false; });
 
-document.getElementById('titlebar').addEventListener('mousedown',e=>{ if(e.target.classList.contains('tb-btn')) return; startDrag(e.clientX,e.clientY); e.preventDefault(); });
-document.addEventListener('mousemove',e=>{ if(dragging) moveDrag(e.clientX,e.clientY); });
-document.addEventListener('mouseup',()=>{ dragging=false; });
-document.getElementById('titlebar').addEventListener('touchstart',e=>{ if(e.target.classList.contains('tb-btn')) return; startDrag(e.touches[0].clientX,e.touches[0].clientY); e.preventDefault(); },{passive:false});
-document.addEventListener('touchmove',e=>{ if(dragging){ moveDrag(e.touches[0].clientX,e.touches[0].clientY); e.preventDefault(); } },{passive:false});
-document.addEventListener('touchend',()=>{ dragging=false; });
-
-/* ============================================================
+/* ==========================================================
    DRAG — icon
-============================================================ */
-let iconDrag=false, iconDX=0, iconDY=0, iconMoved=false;
-function startIconDrag(cx,cy){ iconDrag=true; iconMoved=false; const r=desktopIco.getBoundingClientRect(); iconDX=cx-r.left; iconDY=cy-r.top; desktopIco.classList.add('selected'); }
-desktopIco.addEventListener('mousedown',e=>{ startIconDrag(e.clientX,e.clientY); e.preventDefault(); });
-document.addEventListener('mousemove',e=>{ if(!iconDrag) return; iconMoved=true; clampMove(desktopIco,e.clientX-iconDX,e.clientY-iconDY); });
-document.addEventListener('mouseup',()=>{ iconDrag=false; });
-desktopIco.addEventListener('touchstart',e=>{ startIconDrag(e.touches[0].clientX,e.touches[0].clientY); e.preventDefault(); },{passive:false});
-document.addEventListener('touchmove',e=>{ if(!iconDrag) return; iconMoved=true; clampMove(desktopIco,e.touches[0].clientX-iconDX,e.touches[0].clientY-iconDY); },{passive:false});
-document.addEventListener('touchend',()=>{ iconDrag=false; });
+========================================================== */
+let iconDrag = false, iconDX = 0, iconDY = 0, iconMoved = false;
+desktopIco.addEventListener('mousedown', e => { iconDrag = true; iconMoved = false; const r = desktopIco.getBoundingClientRect(); iconDX = e.clientX - r.left; iconDY = e.clientY - r.top; desktopIco.classList.add('selected'); e.preventDefault(); });
+document.addEventListener('mousemove', e => { if (!iconDrag) return; iconMoved = true; clampMove(desktopIco, e.clientX - iconDX, e.clientY - iconDY); });
+document.addEventListener('mouseup',   () => { iconDrag = false; });
+desktopIco.addEventListener('touchstart', e => { iconDrag = true; iconMoved = false; const r = desktopIco.getBoundingClientRect(); iconDX = e.touches[0].clientX - r.left; iconDY = e.touches[0].clientY - r.top; desktopIco.classList.add('selected'); e.preventDefault(); }, { passive: false });
+document.addEventListener('touchmove', e => { if (!iconDrag) return; iconMoved = true; clampMove(desktopIco, e.touches[0].clientX - iconDX, e.touches[0].clientY - iconDY); }, { passive: false });
+document.addEventListener('touchend',  () => { iconDrag = false; });
+function clampMove(el, nx, ny) { el.style.left = Math.max(0, Math.min(nx, window.innerWidth - el.offsetWidth)) + 'px'; el.style.top = Math.max(0, Math.min(ny, window.innerHeight - 30 - el.offsetHeight)) + 'px'; }
+desktopIco.addEventListener('click', e => { if (iconMoved) { iconMoved = false; return; } desktopIco.classList.add('selected'); });
+desktopIco.addEventListener('dblclick', () => { if (!iconMoved) openWindow(); });
+let lastTap = 0;
+desktopIco.addEventListener('touchend', e => { if (iconMoved) return; const now = Date.now(); if (now - lastTap < 350) { openWindow(); e.preventDefault(); } lastTap = now; });
+document.addEventListener('click', e => { if (!desktopIco.contains(e.target)) desktopIco.classList.remove('selected'); });
+function openWindow() { setWinState('open'); }
 
-function clampMove(el,nx,ny){
-  el.style.left=Math.max(0,Math.min(nx,window.innerWidth-el.offsetWidth))+'px';
-  el.style.top=Math.max(0,Math.min(ny,window.innerHeight-30-el.offsetHeight))+'px';
-}
-
-desktopIco.addEventListener('click',e=>{ if(iconMoved){iconMoved=false;return;} desktopIco.classList.add('selected'); });
-desktopIco.addEventListener('dblclick',()=>{ if(!iconMoved) openWindow(); });
-let lastTap=0;
-desktopIco.addEventListener('touchend',e=>{ if(iconMoved) return; const now=Date.now(); if(now-lastTap<350){openWindow();e.preventDefault();} lastTap=now; });
-document.addEventListener('click',e=>{ if(!desktopIco.contains(e.target)) desktopIco.classList.remove('selected'); });
-
-function openWindow(){ setWinState('open'); }
-
-/* ============================================================
+/* ==========================================================
    TITLEBAR BUTTONS
-============================================================ */
-document.getElementById('minBtn').addEventListener('click',e=>{ e.stopPropagation(); setWinState('minimized'); });
-document.getElementById('closeBtn').addEventListener('click',e=>{ e.stopPropagation(); closeMenus(); document.getElementById('closeOverlay').classList.add('show'); });
-function cancelClose(){ document.getElementById('closeOverlay').classList.remove('show'); }
-function confirmClose(){ document.getElementById('closeOverlay').classList.remove('show'); setWinState('closed'); }
-
-function onTaskbarClick(){
-  if(winState==='open') setWinState('minimized');
-  else if(winState==='minimized') setWinState('open');
+========================================================== */
+document.getElementById('minBtn').addEventListener('click',  e => { e.stopPropagation(); setWinState('minimized'); });
+document.getElementById('closeBtn').addEventListener('click', e => { e.stopPropagation(); closeMenus(); document.getElementById('closeOverlay').classList.add('show'); });
+function cancelClose()  { document.getElementById('closeOverlay').classList.remove('show'); }
+function confirmClose() { document.getElementById('closeOverlay').classList.remove('show'); setWinState('closed'); }
+function onTaskbarClick() {
+  if (winState === 'open')           setWinState('minimized');
+  else if (winState === 'minimized') setWinState('open');
   else openWindow();
 }
 
-/* ============================================================
+/* ==========================================================
+   KEYBOARD SHORTCUTS
+========================================================== */
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 'z') { e.preventDefault(); undoAction(); }
+  if (e.ctrlKey && e.key === 'y') { e.preventDefault(); redoAction(); }
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); doSave(); }
+  if (e.ctrlKey && e.key === 'n') { e.preventDefault(); askNewCount(); }
+  if (e.ctrlKey && e.key === 'c') { e.preventDefault(); doCopy(); }
+  if (e.key === 'F1') { e.preventDefault(); showHelp(); }
+  if (e.key === '+' || e.key === '=') addBaddie();
+  if (e.key === '-') removeBaddie();
+  if (e.key === ' ') { e.preventDefault(); if (!e.repeat) addBaddie(); }
+});
+
+/* ==========================================================
    MENUS
-============================================================ */
-let activeMenu=null;
-function toggleMenu(name){
-  const dd=document.getElementById('dd'+name);
-  const mi=document.getElementById('mi'+name);
-  if(activeMenu && activeMenu!==name) closeMenus();
-  if(dd.classList.contains('open')){ closeMenus(); }
-  else { dd.classList.add('open'); mi.classList.add('open'); activeMenu=name; }
+========================================================== */
+let activeMenu = null;
+function toggleMenu(name) {
+  const dd = document.getElementById('dd' + name);
+  const mi = document.getElementById('mi' + name);
+  if (activeMenu && activeMenu !== name) closeMenus();
+  if (dd.classList.contains('open')) { closeMenus(); }
+  else { dd.classList.add('open'); mi.classList.add('open'); activeMenu = name; }
 }
-function closeMenus(){
-  ['File','Edit','View','Help'].forEach(n=>{
-    document.getElementById('dd'+n).classList.remove('open');
-    document.getElementById('mi'+n).classList.remove('open');
+function closeMenus() {
+  ['File','Edit','View','Help'].forEach(n => {
+    document.getElementById('dd' + n).classList.remove('open');
+    document.getElementById('mi' + n).classList.remove('open');
   });
-  activeMenu=null;
+  activeMenu = null;
 }
-document.addEventListener('click',e=>{ if(!document.getElementById('menubar').contains(e.target)) closeMenus(); });
+document.addEventListener('click', e => { if (!document.getElementById('menubar').contains(e.target)) closeMenus(); });
 
-/* ============================================================
-   COUNTER
-============================================================ */
-function updateDisplay(){ display.textContent=count.toLocaleString(); }
+/* ==========================================================
+   COUNTER LOGIC
+========================================================== */
+function updateDisplay() {
+  display.textContent = count.toLocaleString();
+}
+function setStatus(msg) { statusMsg.textContent = msg; }
 
-const incMsgs=['Baddie recorded.','Processing baddie...','Baddie added to registry.',
-  'Writing to C:\\baddies.dat...','Saving... do not turn off.','Baddie.exe successfully run.',
-  '🍌 Banana mode active.','Registering in HKEY_LOCAL_MACHINE...','DLL not found. Proceeding anyway.'];
-const decMsgs=['Baddie rimossa. 😢','Una baddie in meno...','Rimozione da C:\\baddies.dat...',
-  'Baddie eliminata dal registro.','Operazione completata. Tristezza.'];
+const incMsgs = [
+  'Baddie recorded.',
+  'Processing baddie...',
+  'Baddie added to registry.',
+  'Writing to C:\\baddies.dat...',
+  'Saving... do not turn off.',
+  'Baddie.exe successfully run.',
+  '🍌 Banana mode active.',
+  'Registering in HKEY_LOCAL_MACHINE...',
+  'DLL not found. Proceeding anyway.',
+  'Buffer overflow. Continuing.',
+  'Baddie.sys loaded OK.',
+  'Allocating memory for baddie...',
+];
+const decMsgs = [
+  'Baddie rimossa. 😢',
+  'Una baddie in meno...',
+  'Rimozione da C:\\baddies.dat...',
+  'Baddie eliminata dal registro.',
+  'Operazione completata. Tristezza.',
+  'Defragmentazione completata.',
+];
 
-function addBaddie(){
+function addBaddie() {
   count++;
   pushHistory(count);
-  localStorage.setItem('win64BaddiesCount',count);
-  updateDisplay(); flash('flash-up');
-  statusMsg.textContent=incMsgs[count%incMsgs.length];
+  save(); updateDisplay(); burstEmoji(true); flash('flash-up');
+  setStatus(incMsgs[(count - 1) % incMsgs.length]);
   checkMilestones();
 }
-
-function removeBaddie(){
-  if(count<=0){ showInfo('Errore','😢','Non puoi avere baddies negativi!\n\nIl contatore è già a 0.\n\nError code: BADDIE_UNDERFLOW'); return; }
+function removeBaddie() {
+  if (count <= 0) { showInfo('Errore', '😢', 'Non puoi avere baddies negativi!\n\nIl contatore è già a 0.\n\nError code: BADDIE_UNDERFLOW'); return; }
   count--;
   pushHistory(count);
-  localStorage.setItem('win64BaddiesCount',count);
-  updateDisplay(); flash('flash-down');
-  statusMsg.textContent=decMsgs[count%decMsgs.length];
+  save(); updateDisplay(); burstEmoji(false); flash('flash-down');
+  setStatus(decMsgs[count % decMsgs.length]);
+}
+function checkMilestones() {
+  if (count === 10)   showInfo('Achievement! 🎉', '🎉', '10 Baddies Counted!\n\nYou are a true HumasBaddie Pro.\n\n[OK] per continuare.');
+  if (count === 50)   showInfo('WARNING', '⚠️', 'Baddie overflow detected.\nCount = ' + count + '\nCall IT Support immediately.\n\nC:\\WINDOWS\\SYSTEM32\\baddies.dll');
+  if (count === 104)  openImgWindow();
+  if (count === 100)  showInfo('CRITICAL ERROR', '💥', 'BANANA_KERNEL_PANIC\n\nToo many baddies.\nCount: ' + count + '\n\nA fatal exception has occurred.\nSystem may become unstable.');
+  if (count === 1000) showInfo('HIGH SCORE: 1000', '🏆',
+    '████████████████████\n   CONGRATULAZIONI!   \n████████████████████\n\n1000 BADDIES raggiunto!\n\nSCORE: 1000 pts\nRank: BADDIE MASTER 🍌\n\nHumasCorp ti ringrazia.\nHai vinto una banana immaginaria.');
 }
 
-function checkMilestones(){
-  if(count===10)   showInfo('Achievement! 🎉','🎉','10 Baddies Counted!\n\nYou are a true HumasBaddie Pro.');
-  if(count===50)   showInfo('WARNING ⚠️','⚠️','Baddie overflow detected.\nCount = '+count+'\nCall IT Support immediately.');
-  if(count===100)  showInfo('CRITICAL ERROR 💥','💥','BANANA_KERNEL_PANIC\n\nToo many baddies.\nCount: '+count+'\n\nSystem may become unstable.');
-  if(count===1000) showInfo('SCORE: 1000','🏆',
-    '████████████████████\n'+
-    '█      CONGRATULAZIONI!     █\n'+
-    '████████████████████\n\n'+
-    'Hai raggiunto 1000 BADDIES!\n\n'+
-    'SCORE: 1000 pts\nRank: BADDIE MASTER 🍌\n\n'+
-    'HumasCorp ti ringrazia.\nHai vinto una banana immaginaria.');
+function doSave() {
+  setStatus('Salvataggio in C:\\baddies\\count.dat...');
+  save();
+  setTimeout(() => {
+    showInfo('Save Count', '💾', 'Contatore salvato!\n\nFile: C:\\baddies\\count.dat\nCount: ' + count + '\nBytes written: ' + (count.toString().length + 8) + '\nStatus: OK');
+    setStatus('File salvato. Count: ' + count);
+  }, 300);
 }
-
-/* File > New Count */
-function askNewCount(){ document.getElementById('newCountOverlay').classList.add('show'); }
-function confirmNewCount(){
+function askNewCount() { document.getElementById('newCountOverlay').classList.add('show'); }
+function confirmNewCount() {
   document.getElementById('newCountOverlay').classList.remove('show');
-  count=0;
-  history=[0]; histIdx=0;
-  localStorage.setItem('win64BaddiesCount',0);
-  updateDisplay(); updateEditMenu();
-  statusMsg.textContent='Nuovo contatore creato.';
+  count = 0; history = [0]; histIdx = 0;
+  save(); updateDisplay(); updateEditMenu();
+  setStatus('Nuovo contatore creato.');
+}
+function doCopy() {
+  if (navigator.clipboard) navigator.clipboard.writeText(String(count));
+  showInfo('Copy', '📋', 'Copiato negli appunti:\n\n' + count + ' baddies\n\nCtrl+V per incollare.');
 }
 
-/* Edit > Copy */
-function doCopy(){
-  if(navigator.clipboard) navigator.clipboard.writeText(String(count));
-  showInfo('Copy','📋','Copiato negli appunti:\n\n'+count+' baddies');
-}
 
-function flash(cls){
-  display.classList.remove('flash-up','flash-down');
+function flash(cls) {
+  display.classList.remove('flash-up', 'flash-down');
   void display.offsetWidth;
   display.classList.add(cls);
-  setTimeout(()=>display.classList.remove(cls),180);
+  setTimeout(() => display.classList.remove(cls), 220);
 }
 
-/* ============================================================
-   VIEW — background switcher
-============================================================ */
-const BG_EMOJIS = { banana:'🍌', kebab:'🌯', fire:'🔥', pakistan:'🇵🇰' };
+/* ==========================================================
+   VIEW — background
+========================================================== */
+const BG_EMOJIS = { banana: '🍌', kebab: '🌯', fire: '🔥', pakistan: '🇵🇰' };
 let currentBg = 'banana';
 let bgParticles = [];
-
-function setBg(type){
+function setBg(type) {
   closeMenus();
-  // update checkmarks
-  ['banana','kebab','fire','pakistan','none'].forEach(k=>{
-    const el=document.getElementById('bgOpt'+k.charAt(0).toUpperCase()+k.slice(1));
-    if(el) el.classList.toggle('checked', k===type);
+  ['banana','kebab','fire','pakistan','none'].forEach(k => {
+    const el = document.getElementById('bgOpt' + k.charAt(0).toUpperCase() + k.slice(1));
+    if (el) el.classList.toggle('checked', k === type);
   });
-  currentBg=type;
-  // clear old particles
-  bgParticles.forEach(p=>p.remove());
-  bgParticles=[];
-  if(type==='none') return;
-  const emoji=BG_EMOJIS[type];
-  for(let i=0;i<22;i++){
-    const el=document.createElement('div');
-    el.className='bg-particle'; el.textContent=emoji;
-    const sx=Math.random()*window.innerWidth*.55;
-    const sy=window.innerHeight*.35+Math.random()*window.innerHeight*.65;
-    el.style.left=sx+'px'; el.style.top=sy+'px';
-    el.style.setProperty('--dx',(window.innerWidth*.5+Math.random()*window.innerWidth*.6)+'px');
-    el.style.setProperty('--dy',-(window.innerHeight*.55+Math.random()*window.innerHeight*.55)+'px');
-    const dur=5+Math.random()*6;
-    el.style.animationDuration=dur+'s';
-    el.style.animationDelay=(-Math.random()*dur)+'s';
-    el.style.fontSize=(1.1+Math.random()*1.5)+'rem';
+  currentBg = type;
+  bgParticles.forEach(p => p.remove());
+  bgParticles = [];
+  if (type === 'none') return;
+  const emoji = BG_EMOJIS[type];
+  for (let i = 0; i < 20; i++) {
+    const el = document.createElement('div');
+    el.className = 'bg-particle'; el.textContent = emoji;
+    const sx = Math.random() * window.innerWidth * 0.55;
+    const sy = window.innerHeight * 0.35 + Math.random() * window.innerHeight * 0.65;
+    el.style.left = sx + 'px'; el.style.top = sy + 'px';
+    el.style.setProperty('--dx', (window.innerWidth * 0.5 + Math.random() * window.innerWidth * 0.6) + 'px');
+    el.style.setProperty('--dy', -(window.innerHeight * 0.55 + Math.random() * window.innerHeight * 0.55) + 'px');
+    const dur = 5 + Math.random() * 6;
+    el.style.animationDuration = dur + 's';
+    el.style.animationDelay   = (-Math.random() * dur) + 's';
+    el.style.fontSize = (1.1 + Math.random() * 1.5) + 'rem';
     document.getElementById('bananaLayer').appendChild(el);
     bgParticles.push(el);
   }
 }
 
-/* ============================================================
+/* ==========================================================
    INFO POPUP
-============================================================ */
-function showInfo(title,icon,msg){
-  document.getElementById('pTitle').textContent=title;
-  document.getElementById('pIcon').textContent=icon;
-  document.getElementById('pBodyIcon').textContent=icon;
-  document.getElementById('pText').textContent=msg;
-  document.getElementById('pBtns').innerHTML=`<button class="win-btn" onclick="closeInfo()" style="min-width:70px">OK</button>`;
+========================================================== */
+function showInfo(title, icon, msg) {
+  document.getElementById('pTitle').textContent = title;
+  document.getElementById('pBodyIcon').textContent = icon;
+  document.getElementById('pText').textContent = msg;
+  document.getElementById('pBtns').innerHTML = `<button class="win-btn" onclick="closeInfo()" style="min-width:80px">OK</button>`;
   document.getElementById('infoOverlay').classList.add('show');
 }
-function closeInfo(){
-  document.getElementById('infoOverlay').classList.remove('show');
-  document.getElementById('pBtns').innerHTML=`<button class="win-btn" onclick="closeInfo()" style="min-width:70px">OK</button>`;
+function closeInfo() { document.getElementById('infoOverlay').classList.remove('show'); }
+
+function showHelp() {
+  showInfo('Guida — counter.exe', '❓',
+    '1. Clicca [🍌 +1 Baddie] per aggiungere\n2. Clicca [😢 -1 Baddie] per rimuovere\n3. Edit > Undo (Ctrl+Z) per correggere\n4. Edit > Redo (Ctrl+Y) per rifare\n5. [ _ ] per minimizzare la finestra\n6. [ X ] per chiudere\n\nTrascina il titolo per spostare.\nDoppio click sull\'icona per riaprire.\nTasti + / - per incrementare/ridurre.');
+}
+function showShortcuts() {
+  showInfo('Shortcuts', '⌨️',
+    'Ctrl+Z     Undo\nCtrl+Y     Redo\nCtrl+S     Save\nCtrl+N     New Count\nCtrl+C     Copy Count\nF1         Guida\n+           +1 Baddie\n-            -1 Baddie');
+}
+function showAbout() {
+  showInfo('About counter.exe', '🍌',
+    'Counter Humas Baddies v1.0\n(c) 1998 HumasCorp Ltd.\nAll Rights Reserved.\n\nMemoria disponibile: 640K\nProcessore: Pentium II 233MHz\nSistema: Windows 98 SE\n\nAll baddies reserved. 🍌');
 }
 
-/* ============================================================
+/* ==========================================================
    CLOCK
-============================================================ */
-function tick(){ const n=new Date(); document.getElementById('taskClock').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'); }
-tick(); setInterval(tick,15000);
+========================================================== */
+function tick() {
+  const n = new Date();
+  document.getElementById('taskClock').textContent =
+    String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
+}
+tick(); setInterval(tick, 15000);
 
-/* ============================================================
-   INIT BACKGROUND (bananas by default)
-============================================================ */
+
+/* ==========================================================
+   BURST ANIMATION
+========================================================== */
+const BURST_EMOJIS_SAD = ['😢','😭','💔','😩','😿'];
+function burstEmoji(isAdd) {
+  const emoji = currentBg !== 'none'
+    ? (isAdd ? BG_EMOJIS[currentBg] || '🍌' : BURST_EMOJIS_SAD[Math.floor(Math.random()*BURST_EMOJIS_SAD.length)])
+    : (isAdd ? '🍌' : '😢');
+  const count_b = isAdd ? 14 : 10;
+  // origin: center of counter display
+  const rect = display.getBoundingClientRect();
+  const ox = rect.left + rect.width / 2;
+  const oy = rect.top + rect.height / 2;
+  for (let i = 0; i < count_b; i++) {
+    const el = document.createElement('div');
+    el.className = 'burst-particle' + (isAdd ? '' : ' sad');
+    el.textContent = emoji;
+    const angle = (Math.PI * 2 / count_b) * i + (Math.random() - .5) * .6;
+    const dist  = 80 + Math.random() * 140;
+    const bx    = Math.cos(angle) * dist;
+    const by    = isAdd ? (Math.sin(angle) * dist) : (Math.abs(Math.sin(angle)) * 180 + 60);
+    const dur   = (.45 + Math.random() * .45) + 's';
+    const br    = (Math.random() * 720 - 360) + 'deg';
+    el.style.left = ox + 'px';
+    el.style.top  = oy + 'px';
+    el.style.setProperty('--bx', bx + 'px');
+    el.style.setProperty('--by', (isAdd ? by : by) + 'px');
+    el.style.setProperty('--dur', dur);
+    el.style.setProperty('--br', br);
+    document.body.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+  }
+}
+
+/* ==========================================================
+   IMAGE WINDOW — drag + open
+========================================================== */
+const imgWin = document.getElementById('imgWindow');
+let imgDrag = false, imgDX = 0, imgDY = 0;
+document.getElementById('imgWindowTitlebar').addEventListener('mousedown', e => {
+  if (e.target.classList.contains('tb-btn')) return;
+  imgDrag = true; const r = imgWin.getBoundingClientRect(); imgDX = e.clientX - r.left; imgDY = e.clientY - r.top; e.preventDefault();
+});
+document.addEventListener('mousemove', e => { if (!imgDrag) return; clampMove(imgWin, e.clientX - imgDX, e.clientY - imgDY); });
+document.addEventListener('mouseup',   () => { imgDrag = false; });
+document.getElementById('imgWindowTitlebar').addEventListener('touchstart', e => {
+  if (e.target.classList.contains('tb-btn')) return;
+  imgDrag = true; const r = imgWin.getBoundingClientRect(); imgDX = e.touches[0].clientX - r.left; imgDY = e.touches[0].clientY - r.top; e.preventDefault();
+}, { passive: false });
+document.addEventListener('touchmove', e => { if (!imgDrag) return; clampMove(imgWin, e.touches[0].clientX - imgDX, e.touches[0].clientY - imgDY); }, { passive: false });
+document.addEventListener('touchend',  () => { imgDrag = false; });
+
+function openImgWindow() {
+  imgWin.classList.add('open');
+  imgWin.style.left = Math.min(mainWin.offsetLeft + mainWin.offsetWidth + 10, window.innerWidth - 290) + 'px';
+  imgWin.style.top  = (mainWin.offsetTop + 40) + 'px';
+}
+
+/* ==========================================================
+   INIT
+========================================================== */
 setBg('banana');
+updateDisplay();
+updateEditMenu();
 </script>
 </body>
 </html>
